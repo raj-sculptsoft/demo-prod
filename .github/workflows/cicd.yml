@@ -37,8 +37,12 @@ jobs:
     
     - name: Deploy Built Files to GCP VM
       run: |
+        # Ensure correct permissions on the target directory
+        ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "sudo chown -R ${{ secrets.GCP_USER }}:www-data /var/www/html && sudo chmod -R 755 /var/www/html"
+        
         # Upload the dynamically built files to the GCP server
         scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/
+
 
     - name: Verify Deployment
       run: |
