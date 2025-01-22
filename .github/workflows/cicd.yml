@@ -1,0 +1,31 @@
+name: Deploy React App to GCP
+
+on:
+  push:
+    branches:
+      - main  # Trigger deployment on pushes to this branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+
+    - name: Install Dependencies
+      run: |
+        npm install
+
+    - name: Build React App
+      run: |
+        npm run build  # Dynamically generates the "dist" folder during the pipeline execution
+
+    - name: Set Up SSH
+      run: |
+        # Configure SSH using the private key stored in GitHub Secrets
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GCP_SSH_FILE }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.GCP__IP }} >> ~/.ssh/known_hosts
