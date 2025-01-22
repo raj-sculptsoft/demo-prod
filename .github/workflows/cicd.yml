@@ -10,23 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout Code
     - name: Checkout Code
       uses: actions/checkout@v4
 
-
+    # Step 2: Install Dependencies
     - name: Install Dependencies
       run: |
         npm install
 
+    # Step 3: Build React App
     - name: Build React App
       run: |
         npm run build  # Dynamically generates the "dist" folder during the pipeline execution
-   
+
+    # Step 4: Debug Environment Variables (Optional)
+    - name: Debug Environment Variables
+      run: |
+        echo "COMPANY_ID: ${{ secrets.COMPANY_ID }}"
+        echo "GCP_IP: ${{ secrets.GCP_IP }}"
+        echo "GCP_USER: ${{ secrets.GCP_USER }}"
+
+    # Step 5: Debug SSH (Check if the IP is correct)
     - name: Debug SSH
       run: |
         echo "IP Address: ${{ secrets.GCP_IP }}"
         ssh-keyscan -H ${{ secrets.GCP_IP }}
 
+    # Step 6: Set Up SSH Key
     - name: Set Up SSH
       run: |
         # Configure SSH using the private key stored in GitHub Secrets
@@ -34,11 +45,8 @@ jobs:
         echo "${{ secrets.GCP_SSH_FILE }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.GCP_IP }} >> ~/.ssh/known_hosts
-    
-    - name: Use COMPANY_ID
-      run: |
-        echo "Using COMPANY_ID: ${{ secrets.COMPANY_ID }}"
-      
+
+    # Step 7: Deploy Built Files to GCP VM
     - name: Deploy Built Files to GCP VM
       run: |
         # Ensure correct permissions on the target directory
@@ -47,8 +55,12 @@ jobs:
         # Upload the dynamically built files to the GCP server
         scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/
 
-
+    # Step 8: Verify Deployment
     - name: Verify Deployment
       run: |
         ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "ls -la /var/www/html/"
-
+        
+    # Step 9: (Optional) Check API Endpoint (Optional, for debugging)
+    - name: Check API Endpoint
+      run: |
+        curl -X POST "https://app.dev.prdsec.com/${{ secrets.COMPANY_ID }}/api/Product/List" -d '{}'
