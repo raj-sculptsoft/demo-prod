@@ -35,6 +35,10 @@ jobs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.GCP_IP }} >> ~/.ssh/known_hosts
     
+    - name: Use COMPANY_ID
+      run: |
+        echo "Using COMPANY_ID: ${{ secrets.COMPANY_ID }}"
+      
     - name: Deploy Built Files to GCP VM
       run: |
         # Ensure correct permissions on the target directory
