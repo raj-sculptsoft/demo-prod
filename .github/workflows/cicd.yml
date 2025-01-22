@@ -21,6 +21,11 @@ jobs:
     - name: Build React App
       run: |
         npm run build  # Dynamically generates the "dist" folder during the pipeline execution
+   
+    - name: Debug SSH
+      run: |
+        echo "IP Address: ${{ secrets.GCP_IP }}"
+        ssh-keyscan -H ${{ secrets.GCP_IP }}
 
     - name: Set Up SSH
       run: |
@@ -28,4 +33,4 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.GCP_SSH_FILE }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.GCP__IP }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.GCP_IP }} >> ~/.ssh/known_hosts
