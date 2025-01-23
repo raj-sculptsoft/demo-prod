@@ -25,13 +25,13 @@ jobs:
        # echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env 
        # echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.COMPANY_IDS }}" >> .env 
        # cat .env # Debug output to ensure variables are set correctly (oecho "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env echo "VITE_PUBLIC_COMPANY_ID=${{ Optional) 
-      env:
-        VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
-        VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
+      # env:
+      #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
+      #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
       run: |
         echo "Building React app with injected environment variables..." 
-        echo "API URL: $VITE_PUBLIC_API_URL" 
-        echo "Company ID: $VITE_PUBLIC_COMPANY_ID"
+        echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
+        echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
 
     # Step 4: Build the React App
     - name: Build React App
