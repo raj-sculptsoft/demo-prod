@@ -23,8 +23,8 @@ jobs:
     - name: Fetch and Inject Codespace Secrets
       run: |
         # Dynamically export secrets as environment variables
-        export VITE_PUBLIC_API_URL=$(echo $CODESPACE_SECRET_VITE_PUBLIC_API_URL1)
-        export VITE_PUBLIC_COMPANY_ID=$(echo $CODESPACE_SECRET_COMPANY_IDS)
+        export VITE_PUBLIC_API_URL=$(echo $CODESPACE_SECRET.VITE_PUBLIC_API_URL1)
+        export VITE_PUBLIC_COMPANY_ID=$(echo $CODESPACE_SECRET.COMPANY_IDS)
         echo "Secrets fetched dynamically..."
         echo "API URL: $VITE_PUBLIC_API_URL"
         echo "Company ID: $VITE_PUBLIC_COMPANY_ID"
@@ -54,7 +54,6 @@ jobs:
         
         # Upload the dynamically built files and the .env file to the GCP server
         scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/
-        scp .env ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/.env
 
     # Step 7: Verify Deployment
     - name: Verify Deployment
