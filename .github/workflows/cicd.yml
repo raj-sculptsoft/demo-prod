@@ -16,30 +16,28 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        npm install dotenv
-    - name: Install Dependencies
-      run: |
         npm fund
+
     # Step 2: Install Dependencies
     - name: Install Dependencies
       run: |
         npm install
           - name: Install Dependencies
          
-    # # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
-    # - name: Create .env file dynamically with GitHub Secrets 
+    # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
+    - name: Create .env file dynamically with GitHub Secrets 
    
-    #   # env:
-    #   #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
-    #   #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
-    #   # run: |
-    #   #   echo "Building React app with injected environment variables..." 
-    #   #   echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
-    #   #   echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
-    #   run: |
-    #     echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env
-    #     echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.VITE_PUBLIC_COMPANY_ID }}" >> .env 
-    #     cat .env # Debug output to ensure variables are set correctly (optional) 
+      # env:
+      #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
+      #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
+      # run: |
+      #   echo "Building React app with injected environment variables..." 
+      #   echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
+      #   echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
+      run: |
+        echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env
+        echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.VITE_PUBLIC_COMPANY_ID }}" >> .env 
+        cat .env # Debug output to ensure variables are set correctly (optional) 
 
     # Step 4: Build the React App
     - name: Build React App
