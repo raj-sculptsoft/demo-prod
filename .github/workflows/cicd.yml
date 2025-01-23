@@ -21,17 +21,21 @@ jobs:
   
     # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
     - name: Create .env file dynamically with GitHub Secrets 
-     # run: |
-       # echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env 
-       # echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.COMPANY_IDS }}" >> .env 
-       # cat .env # Debug output to ensure variables are set correctly (oecho "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env echo "VITE_PUBLIC_COMPANY_ID=${{ Optional) 
+   
       # env:
       #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
       #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
+      # run: |
+      #   echo "Building React app with injected environment variables..." 
+      #   echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
+      #   echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
+      env:  # Inject secrets directly as environment variables
+        VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL }}
+        VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_ID }}
       run: |
-        echo "Building React app with injected environment variables..." 
-        echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
-        echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
+        echo "Building React app with injected environment variables..."
+        echo "API URL: $VITE_PUBLIC_API_URL"
+        echo "Company ID: $VITE_PUBLIC_COMPANY_ID"
 
     # Step 4: Build the React App
     - name: Build React App
