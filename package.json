@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node -r dotenv/config vite build && tsc -b",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "node -r dotenv/config vite preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
