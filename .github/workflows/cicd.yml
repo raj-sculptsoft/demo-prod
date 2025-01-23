@@ -22,7 +22,6 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install
-          - name: Install Dependencies
          
     # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
     - name: Create .env file dynamically with GitHub Secrets 
