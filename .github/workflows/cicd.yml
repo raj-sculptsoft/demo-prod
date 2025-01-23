@@ -13,11 +13,13 @@ jobs:
     # Step 1: Checkout Code
     - name: Checkout Code
       uses: actions/checkout@v4
-    
+
     - name: Install Dependencies
       run: |
         npm install dotenv
-
+    - name: Install Dependencies
+      run: |
+        npm fund
     # Step 2: Install Dependencies
     - name: Install Dependencies
       run: |
