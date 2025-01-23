@@ -19,50 +19,44 @@ jobs:
       run: |
         npm install
   
-    # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
-    - name: Create .env file dynamically with GitHub Secrets 
+    # # Step 3: Fetch Secrets Dynamically and Inject as Environment Variables
+    # - name: Create .env file dynamically with GitHub Secrets 
    
-      # env:
-      #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
-      #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
-      # run: |
-      #   echo "Building React app with injected environment variables..." 
-      #   echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
-      #   echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
+    #   # env:
+    #   #   VITE_PUBLIC_API_URL: ${{ secrets.VITE_PUBLIC_API_URL1 }} 
+    #   #   VITE_PUBLIC_COMPANY_ID: ${{ secrets.COMPANY_IDS }}
+    #   # run: |
+    #   #   echo "Building React app with injected environment variables..." 
+    #   #   echo "VITE_PUBLIC_API_URL: $VITE_PUBLIC_API_URL" 
+    #   #   echo "VITE_PUBLIC_COMPANY_ID: $VITE_PUBLIC_COMPANY_ID"
+    #   run: |
+    #     echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env
+    #     echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.VITE_PUBLIC_COMPANY_ID }}" >> .env 
+    #     cat .env # Debug output to ensure variables are set correctly (optional) 
+
+    # Step 4: Build the React App
+    - name: Build React App
       run: |
-        echo "Using Codespaces secrets..."
-        echo "API URL: $CODESPACE_SECRET_VITE_PUBLIC_API_URL1"
-        echo "Company ID: $CODESPACE_SECRET_COMPANY_IDS"
-    
-        # Export for use in subsequent steps
-        echo "VITE_PUBLIC_API_URL=$CODESPACE_SECRET_VITE_PUBLIC_API_URL1" >> $GITHUB_ENV
-        echo "VITE_PUBLIC_COMPANY_ID=$CODESPACE_SECRET_COMPANY_IDS" >> $GITHUB_ENV
+        npm run build  # This generates the "dist" folder
 
+    # Step 5: Set up SSH Key for GCP Deployment
+    - name: Set Up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.GCP_SSH_FILE }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.GCP_IP }} >> ~/.ssh/known_hosts
 
-    # # Step 4: Build the React App
-    # - name: Build React App
-    #   run: |
-    #     npm run build  # This generates the "dist" folder
-
-    # # Step 5: Set up SSH Key for GCP Deployment
-    # - name: Set Up SSH
-    #   run: |
-    #     mkdir -p ~/.ssh
-    #     echo "${{ secrets.GCP_SSH_FILE }}" > ~/.ssh/id_rsa
-    #     chmod 600 ~/.ssh/id_rsa
-    #     ssh-keyscan -H ${{ secrets.GCP_IP }} >> ~/.ssh/known_hosts
-
-    # # Step 6: Deploy Built Files and .env to GCP VM
-    # - name: Deploy Built Files and .env to GCP VM
-    #   run: |
-    #     # Ensure correct permissions on the target directory
-    #     ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "sudo chown -R ${{ secrets.GCP_USER }}:www-data /var/www/html && sudo chmod -R 755 /var/www/html"
+    # Step 6: Deploy Built Files and .env to GCP VM
+    - name: Deploy Built Files and .env to GCP VM
+      run: |
+        # Ensure correct permissions on the target directory
+        ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "sudo chown -R ${{ secrets.GCP_USER }}:www-data /var/www/html && sudo chmod -R 755 /var/www/html"
         
-    #     # Upload the dynamically built files and the .env file to the GCP server
-    #     scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/
-
-    # # Step 7: Verify Deployment
-    # - name: Verify Deployment
-    #   run: |
-    #     ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "ls -la /var/www/html/"
-
+        # Upload the dynamically built files and the .env file to the GCP server
+        scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }}:/var/www/html/
+    
+    # Step 7: Verify Deployment
+    - name: Verify Deployment
+      run: |
+        ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP }} "ls -la /var/www/html/"
