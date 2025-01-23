@@ -23,7 +23,7 @@ jobs:
     - name: Create .env file
       run: |
         echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL }}" > .env
-        echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.COMPANY_ID }}" >> .env
+        echo "VITE_PUBLIC_COMPANY_ID=${{ secrets.COMPANY_IDS }}" >> .env
         cat .env  # Debug output to ensure variables are set correctly (optional)
 
     # Step 4: Build the React App
