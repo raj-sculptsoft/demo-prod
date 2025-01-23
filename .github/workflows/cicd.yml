@@ -23,12 +23,12 @@ jobs:
     - name: Fetch and Inject Codespace Secrets
       run: |
         # Dynamically export secrets as environment variables
-        export VITE_PUBLIC_API_URL=$(echo $CODESPACE_SECRET_VITE_PUBLIC_API_URL)
-        export VITE_PUBLIC_COMPANY_ID=$(echo $CODESPACE_SECRET_VITE_PUBLIC_COMPANY_ID)
+        export VITE_PUBLIC_API_URL=$(echo $CODESPACE_SECRET_VITE_PUBLIC_API_URL1)
+        export VITE_PUBLIC_COMPANY_ID=$(echo $CODESPACE_SECRET_COMPANY_IDS)
         echo "Secrets fetched dynamically..."
         echo "API URL: $VITE_PUBLIC_API_URL"
         echo "Company ID: $VITE_PUBLIC_COMPANY_ID"
-
+    
         # Inject into subsequent steps using `env`
         echo "VITE_PUBLIC_API_URL=$VITE_PUBLIC_API_URL" >> $GITHUB_ENV
         echo "VITE_PUBLIC_COMPANY_ID=$VITE_PUBLIC_COMPANY_ID" >> $GITHUB_ENV
