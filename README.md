@@ -49,7 +49,7 @@ A modern React-based frontend application for the ProdSec platform, built with T
    VITE_PUBLIC_API_URL=
 
    # Authentication
-   VITE_PUBLIC_COMPANY_ID=
+   config.COMPANY_ID=
    ```
 
 4. Start the development server:

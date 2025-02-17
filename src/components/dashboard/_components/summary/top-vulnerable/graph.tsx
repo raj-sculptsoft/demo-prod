@@ -1,3 +1,4 @@
+import config from "@/config/env";
 import { useAppDispatch } from "@/hooks/use-store";
 import { getDashboardPopUpTopVulnerability } from "@/store/dashboard/api";
 import Konva from "konva";
@@ -39,25 +40,137 @@ interface GraphProps {
   data: DashboardTopVulnerabilityList;
 }
 
-const defaultNodeData = [
-  { x: 290, y: 180, color: "#FD5454" },
-  { x: 505, y: 300, color: "#5E77FF" },
-  { x: 80, y: 100, color: "#D04D6C" },
-  { x: 75, y: 300, color: "#69E9A8" },
-  { x: 530, y: 100, color: "#FEC53D" },
-] as const;
+// const defaultNodeData = [
+//   { x: 290, y: 180, color: "#FD5454" },
+//   { x: 505, y: 300, color: "#5E77FF" },
+//   { x: 80, y: 100, color: "#D04D6C" },
+//   { x: 75, y: 300, color: "#69E9A8" },
+//   { x: 530, y: 100, color: "#FEC53D" },
+// ] as const;
 
 const Graph: React.FC<GraphProps> = ({
   hasChildTooltip = true,
-  width = 600,
-  height = 400,
+  // width = 600,
+  // height = 400,
   data,
 }) => {
   const dispatch = useAppDispatch();
-  const company_id = import.meta.env.VITE_PUBLIC_COMPANY_ID;
+  const company_id = config.COMPANY_ID;
   const [savedProductId, setSavedProductId] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const product_id = searchParams.get("product") ?? "";
+
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth * 0.5, // 40% of screen width
+    height: 400, // Fixed height
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth * 0.5, // Adjust width dynamically
+        height: 400, // Keep height fixed
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const defaultNodeData = useMemo(() => {
+    switch (data?.list.length) {
+      case 1:
+        return [
+          {
+            x: dimensions.width * 0.42,
+            y: dimensions.height * 0.5,
+            color: "#FD5454",
+          },
+        ];
+      case 2:
+        return [
+          {
+            x: dimensions.width * 0.25,
+            y: dimensions.height * 0.5,
+            color: "#FD5454",
+          },
+          {
+            x: dimensions.width * 0.62,
+            y: dimensions.height * 0.5,
+            color: "#5E77FF",
+          },
+        ];
+      case 3:
+        return [
+          {
+            x: dimensions.width * 0.2,
+            y: dimensions.height * 0.25,
+            color: "#FD5454",
+          },
+          {
+            x: dimensions.width * 0.65,
+            y: dimensions.height * 0.25,
+            color: "#5E77FF",
+          },
+          {
+            x: dimensions.width * 0.42,
+            y: dimensions.height * 0.75,
+            color: "#D04D6C",
+          },
+        ];
+      case 4:
+        return [
+          {
+            x: dimensions.width * 0.2,
+            y: dimensions.height * 0.22,
+            color: "#FD5454",
+          },
+          {
+            x: dimensions.width * 0.65,
+            y: dimensions.height * 0.22,
+            color: "#5E77FF",
+          },
+          {
+            x: dimensions.width * 0.2,
+            y: dimensions.height * 0.75,
+            color: "#69E9A8",
+          },
+          {
+            x: dimensions.width * 0.65,
+            y: dimensions.height * 0.75,
+            color: "#FEC53D",
+          },
+        ];
+      default:
+        return [
+          {
+            x: dimensions.width * 0.14,
+            y: dimensions.height * 0.22,
+            color: "#FD5454",
+          },
+          {
+            x: dimensions.width * 0.7,
+            y: dimensions.height * 0.22,
+            color: "#5E77FF",
+          },
+          {
+            x: dimensions.width * 0.42,
+            y: dimensions.height * 0.5,
+            color: "#D04D6C",
+          },
+          {
+            x: dimensions.width * 0.14,
+            y: dimensions.height * 0.75,
+            color: "#69E9A8",
+          },
+          {
+            x: dimensions.width * 0.7,
+            y: dimensions.height * 0.75,
+            color: "#FEC53D",
+          },
+        ];
+    }
+  }, [dimensions, data?.list.length]);
 
   const [tooltip, setTooltip] = useState<{
     details:
@@ -82,14 +195,14 @@ const Graph: React.FC<GraphProps> = ({
   });
 
   const [childPositions, setChildPositions] = useState<{
-    [key: string]: { x: number; y: number; size: number }[];
+    [key: string]: { x: number; y: number; size: number; color: string }[];
   }>({});
 
   const getSizeByVulnerabilityCount = (count: number): number => {
     if (count <= 10) return 5;
-    if (count <= 50) return 10;
-    if (count <= 100) return 15;
-    if (count <= 200) return 20;
+    if (count <= 50) return 9;
+    if (count <= 100) return 13;
+    if (count <= 200) return 17;
     return 25;
   };
 
@@ -122,7 +235,7 @@ const Graph: React.FC<GraphProps> = ({
           color: "gray", // Provide a fallback object
         };
 
-        // Dynamically set the radius using the getSizeByVulnerabilityCount function
+        // Dynamically set the radius using the getSizeByVulnerability function
         const radius = getSizeByVulnerability(
           item.vulnerabilities?.length ?? 0,
         );
@@ -141,9 +254,46 @@ const Graph: React.FC<GraphProps> = ({
     );
   }, [data?.list]);
 
+  const getColorByVulnerability = (vulnerabilities: {
+    critical_count?: number;
+    high_count?: number;
+    medium_count?: number;
+    low_count?: number;
+  }) => {
+    const severityLevels = [
+      {
+        key: "critical_count",
+        value: vulnerabilities.critical_count ?? 0,
+        color: "#D04D6C",
+      },
+      {
+        key: "high_count",
+        value: vulnerabilities.high_count ?? 0,
+        color: "#FB9199",
+      },
+      {
+        key: "medium_count",
+        value: vulnerabilities.medium_count ?? 0,
+        color: "#FEC53D",
+      },
+      {
+        key: "low_count",
+        value: vulnerabilities.low_count ?? 0,
+        color: "#31D080",
+      },
+    ];
+
+    const highestSeverity = severityLevels
+      .filter((item) => item.value > 0)
+      .sort((a, b) => b.value - a.value)[0];
+
+    return highestSeverity ? highestSeverity.color : "#E5D9F8";
+  };
+
   const calculateChildPositions = useCallback(
     (parent: NonNullable<(typeof nodes)[number]>, childCount: number) => {
-      const positions: { x: number; y: number; size: number }[] = [];
+      const positions: { x: number; y: number; size: number; color: string }[] =
+        [];
       const angleStep = (2 * Math.PI) / childCount;
 
       const maxDistance = parent.radius * 3.7;
@@ -153,10 +303,10 @@ const Graph: React.FC<GraphProps> = ({
         const childVulnerability =
           parent.vulnerabilities[i]?.total_vulnerabilities || 0;
         const size = getSizeByVulnerabilityCount(childVulnerability);
+        const color = getColorByVulnerability(parent.vulnerabilities[i] || {});
 
-        let x: number,
-          y: number,
-          attempts = 0;
+        let x: number, y: number;
+        let attempts = 0;
 
         do {
           const angle = i * angleStep + Math.random() * 0.2;
@@ -174,15 +324,14 @@ const Graph: React.FC<GraphProps> = ({
         } while (
           positions.some((pos) => {
             const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
-            return distance < size + pos.size + 10;
+            return distance < size + pos.size + 5; // Reduced buffer zone
           }) ||
           Math.sqrt((x - parent.x) ** 2 + (y - parent.y) ** 2) < minDistance ||
           Math.sqrt((x - parent.x) ** 2 + (y - parent.y) ** 2) > maxDistance
         );
 
-        if (attempts <= 50) {
-          positions.push({ x, y, size });
-        }
+        // Store color with position data
+        positions.push({ x, y, size, color });
       }
 
       return positions;
@@ -220,7 +369,7 @@ const Graph: React.FC<GraphProps> = ({
 
   useEffect(() => {
     const newChildPositions: {
-      [key: string]: { x: number; y: number; size: number }[];
+      [key: string]: { x: number; y: number; size: number; color: string }[];
     } = {};
     nodes.forEach((node) => {
       if (!node) return;
@@ -333,8 +482,8 @@ const Graph: React.FC<GraphProps> = ({
     <div className="no-scrollbar overflow-scroll">
       {hasVulnerabilities ? (
         <Stage
-          width={width}
-          height={height}
+          width={dimensions.width}
+          height={dimensions.height}
           onMouseLeave={() =>
             setTooltip({ visible: false, x: 0, y: 0, details: null })
           }
@@ -343,13 +492,11 @@ const Graph: React.FC<GraphProps> = ({
             {nodes.map((node) => {
               if (!node) return null;
               const children = childPositions[node.id] || [];
-
               return (
                 <React.Fragment key={node.id}>
                   {children.map((child, index) => {
                     const childVulnerabilityDetails =
                       tooltipDetails[node.id]?.[index] || null;
-
                     return (
                       <React.Fragment key={`${node.id}-child-${index}`}>
                         <Line
@@ -361,18 +508,20 @@ const Graph: React.FC<GraphProps> = ({
                           x={child.x}
                           y={child.y}
                           radius={child.size}
-                          fill="#E5D9F8"
+                          fill={child.color}
+                          // fill="#E5D9F8"
                           onMouseEnter={(e) => {
                             const stage = e.target.getStage();
                             if (!stage) return;
-                            const stageWidth = stage.width();
+                            // const stageWidth = stage.width();
                             // const stageHeight = stage.height();
                             const { x, y } = calculateTooltipPosition(
                               child.x,
                               child.y,
                               180,
                               100,
-                              stageWidth,
+                              600,
+                              // stageWidth,
                               // stageHeight,
                               10,
                             );

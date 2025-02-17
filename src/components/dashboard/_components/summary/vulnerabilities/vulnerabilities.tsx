@@ -14,6 +14,14 @@ export default function Vulnerabilities() {
     { type: "Critical", value: data.critical_count, className: "fill-red" },
   ];
 
+  if (data.total_vulnerabilities !== 0) {
+    chartData.push({
+      type: "Total",
+      value: data.total_vulnerabilities,
+      className: "fill-white",
+    });
+  }
+
   const vulnerabilitiesData = [
     { name: "Critical", value: data.critical_count, className: "bg-red" },
     { name: "High", value: data.high_count, className: "bg-orange-chart" },
@@ -30,10 +38,10 @@ export default function Vulnerabilities() {
             innerRadius={50}
             startAngle={90}
             endAngle={-270}
-            outerRadius={120}
+            outerRadius={130}
             barSize={12}
           >
-            <RadialBar dataKey="value" background />
+            <RadialBar dataKey="value" background isAnimationActive={false} />
           </RadialBarChart>
         </ChartContainer>
         <div className="flex flex-col justify-center">

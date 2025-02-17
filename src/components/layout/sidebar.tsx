@@ -7,6 +7,7 @@ import VulnerabilitiesIcon from "../../assets/icons/vulnerabilities";
 
 import Settings from "@/assets/icons/settings";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
+import { resetStatusId, resetStatusReportState } from "@/store/settings/slice";
 import {
   resetReportId,
   resetReportStatusState,
@@ -42,7 +43,7 @@ const items = [
     title: "Vulnerabilities",
     url: "/vulnerabilities",
     childrenRoutes: [
-      "/vulnerability/:productId/:assetId/:vulnerabilityId/details",
+      "/vulnerability/product/:productId/asset/:assetId/vulnerability/:vulnerabilityId/details",
     ],
     icon: <VulnerabilitiesIcon />,
   },
@@ -64,6 +65,7 @@ export default function SideBar() {
   const dispatch = useAppDispatch();
   const isFirstRender = useRef(true);
   const { reportId } = useAppSelector((state) => state.uploadReport);
+  const statusId = useAppSelector((state) => state.synk.statusId);
 
   // Helper function to check if a route pattern matches the current path
   const isRouteMatch = (pattern: string, path: string) => {
@@ -76,13 +78,16 @@ export default function SideBar() {
   };
 
   useEffect(() => {
-    if (reportId) {
+    if (reportId || statusId) {
       if (isFirstRender.current) {
         // Skip the first render
         isFirstRender.current = false;
       } else {
         dispatch(resetReportId());
         dispatch(resetReportStatusState());
+
+        dispatch(resetStatusReportState());
+        dispatch(resetStatusId());
         isFirstRender.current = true;
       }
     } else {

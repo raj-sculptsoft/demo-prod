@@ -7,7 +7,12 @@ import { deleteProduct } from "../products/api";
 import {
   getAllProducts,
   getAssetsByProduct,
+  getFormSelectComplianceOptions,
+  getFormSelectCustomerOptions,
+  getFormSelectDependencyOptions,
   getFormSelectOptions,
+  getFormSelectProductOptions,
+  getFormSelectRevenueOptions,
   getListForTable,
 } from "./api";
 
@@ -48,6 +53,31 @@ export interface ICommonInitialState {
     data: { list: StaticSelectOptions[] };
     error: string;
   };
+  formSelectProductOptions: {
+    loading: boolean;
+    data: { list: StaticSelectOptions[] };
+    error: string;
+  };
+  formSelectRevenueOptions: {
+    loading: boolean;
+    data: { list: StaticSelectOptions[] };
+    error: string;
+  };
+  formSelectCustomerOptions: {
+    loading: boolean;
+    data: { list: StaticSelectOptions[] };
+    error: string;
+  };
+  formSelectComplianceOptions: {
+    loading: boolean;
+    data: { list: StaticSelectOptions[] };
+    error: string;
+  };
+  formSelectDependencyOptions: {
+    loading: boolean;
+    data: { list: StaticSelectOptions[] };
+    error: string;
+  };
 }
 
 const initialState: ICommonInitialState = {
@@ -83,6 +113,31 @@ const initialState: ICommonInitialState = {
     error: "",
   },
   formSelectOptions: {
+    loading: false,
+    data: { list: [] },
+    error: "",
+  },
+  formSelectProductOptions: {
+    loading: false,
+    data: { list: [] },
+    error: "",
+  },
+  formSelectRevenueOptions: {
+    loading: false,
+    data: { list: [] },
+    error: "",
+  },
+  formSelectCustomerOptions: {
+    loading: false,
+    data: { list: [] },
+    error: "",
+  },
+  formSelectComplianceOptions: {
+    loading: false,
+    data: { list: [] },
+    error: "",
+  },
+  formSelectDependencyOptions: {
     loading: false,
     data: { list: [] },
     error: "",
@@ -187,9 +242,74 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectOptions.rejected, (state, { error }) => {
         state.formSelectOptions.loading = false;
         state.formSelectOptions.error = error.message as string;
-      });
+      })
 
-    builder
+      .addCase(getFormSelectProductOptions.pending, (state) => {
+        state.formSelectProductOptions.loading = true;
+      })
+      .addCase(getFormSelectProductOptions.fulfilled, (state, { payload }) => {
+        state.formSelectProductOptions.loading = false;
+        state.formSelectProductOptions.data.list = payload.data.list ?? [];
+      })
+      .addCase(getFormSelectProductOptions.rejected, (state, { error }) => {
+        state.formSelectProductOptions.loading = false;
+        state.formSelectProductOptions.error = error.message as string;
+      })
+
+      .addCase(getFormSelectRevenueOptions.pending, (state) => {
+        state.formSelectRevenueOptions.loading = true;
+      })
+      .addCase(getFormSelectRevenueOptions.fulfilled, (state, { payload }) => {
+        state.formSelectRevenueOptions.loading = false;
+        state.formSelectRevenueOptions.data.list = payload.data.list ?? [];
+      })
+      .addCase(getFormSelectRevenueOptions.rejected, (state, { error }) => {
+        state.formSelectRevenueOptions.loading = false;
+        state.formSelectRevenueOptions.error = error.message as string;
+      })
+
+      .addCase(getFormSelectCustomerOptions.pending, (state) => {
+        state.formSelectCustomerOptions.loading = true;
+      })
+      .addCase(getFormSelectCustomerOptions.fulfilled, (state, { payload }) => {
+        state.formSelectCustomerOptions.loading = false;
+        state.formSelectCustomerOptions.data.list = payload.data.list ?? [];
+      })
+      .addCase(getFormSelectCustomerOptions.rejected, (state, { error }) => {
+        state.formSelectCustomerOptions.loading = false;
+        state.formSelectCustomerOptions.error = error.message as string;
+      })
+
+      .addCase(getFormSelectComplianceOptions.pending, (state) => {
+        state.formSelectComplianceOptions.loading = true;
+      })
+      .addCase(
+        getFormSelectComplianceOptions.fulfilled,
+        (state, { payload }) => {
+          state.formSelectComplianceOptions.loading = false;
+          state.formSelectComplianceOptions.data.list = payload.data.list ?? [];
+        },
+      )
+      .addCase(getFormSelectComplianceOptions.rejected, (state, { error }) => {
+        state.formSelectComplianceOptions.loading = false;
+        state.formSelectComplianceOptions.error = error.message as string;
+      })
+
+      .addCase(getFormSelectDependencyOptions.pending, (state) => {
+        state.formSelectDependencyOptions.loading = true;
+      })
+      .addCase(
+        getFormSelectDependencyOptions.fulfilled,
+        (state, { payload }) => {
+          state.formSelectDependencyOptions.loading = false;
+          state.formSelectDependencyOptions.data.list = payload.data.list ?? [];
+        },
+      )
+      .addCase(getFormSelectDependencyOptions.rejected, (state, { error }) => {
+        state.formSelectDependencyOptions.loading = false;
+        state.formSelectDependencyOptions.error = error.message as string;
+      })
+
       .addCase(deleteProduct.rejected, (state, { error }) => {
         state.dataTable.error = error.message as string;
       })

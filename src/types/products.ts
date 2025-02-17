@@ -11,7 +11,12 @@ export interface Product {
   product_description: string;
   product_domain: string;
   target_audience: string;
-  system_architech: string;
+  product_live: string | null;
+  revenue_impact: string | null;
+  customer_data_type: string | null;
+  compliance_required: string | null;
+  dependency_impact: string | null;
+  system_architech: string | null;
   no_of_asset: number;
   company: Company;
   target_audience_data: TargetAudienceData;

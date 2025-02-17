@@ -27,6 +27,7 @@ interface IDataTableProps {
   rowSkeleton: React.ReactNode;
   tableClassName?: string;
   noOfColumns: number;
+  firstLoading?: boolean;
 }
 
 export default function DataTable({
@@ -35,6 +36,7 @@ export default function DataTable({
   rowSkeleton,
   tableClassName = "",
   noOfColumns = 4,
+  firstLoading = true,
 }: IDataTableProps) {
   const {
     rowsPerPage,
@@ -46,7 +48,8 @@ export default function DataTable({
 
   const dispatch = useAppDispatch();
 
-  const displayPage = totalPages ? (currentPage - 1) * rowsPerPage + 1 : 0;
+  // const displayPage = totalPages ? (currentPage - 1) * rowsPerPage + 1 : 0;
+  const displayPage = total_count > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0;
 
   return (
     <>
@@ -55,7 +58,7 @@ export default function DataTable({
           <TableRow className="select-none">{headers}</TableRow>
         </TableHeader>
         <TableBody>
-          {isLoading ? rowSkeleton : body}
+          {isLoading && firstLoading ? rowSkeleton : body}
 
           {!isLoading && !(list as unknown[])?.length ? (
             <TableRow>
@@ -90,10 +93,10 @@ export default function DataTable({
 
         <div className="text-sm font-bold">
           Showing data{" "}
-          {isLoading
+          {isLoading && firstLoading
             ? "..."
             : `${displayPage} to ${Math.min(currentPage * rowsPerPage, total_count)}`}{" "}
-          of {isLoading ? "..." : total_count} entries
+          of {isLoading && firstLoading ? "..." : total_count} entries
         </div>
 
         <div className="flex items-center gap-2">

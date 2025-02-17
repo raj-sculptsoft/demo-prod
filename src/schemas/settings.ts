@@ -4,20 +4,23 @@ import { z } from "zod";
 const FormSchemaOrg = z.object({
   orgId: z
     .string()
-    .nonempty("Organization ID is required")
-    .length(36, "Organization ID must be exactly 36 characters"),
+    .nonempty(
+      "Organization Slug is required, Please get it from Semgrep account.",
+    ),
   apiKey: z
     .string()
-    .nonempty("API Access Key is required")
-    .length(36, "Organization ID must be exactly 36 characters"),
+    .nonempty(
+      "API Access Token is required, Please generate it from Semgrep account.",
+    ),
+  syncPeriod: z.string().nonempty("Frequency selection is required."),
 });
 
 // Schema for API form
 const FormSchemaAPI = z.object({
   product_id: z.string().min(1, "Product is required"),
-  snyk_target_id: z
+  semgrep_project_id: z
     .array(z.string())
-    .nonempty("At least one target is required"),
+    .nonempty("At least one project is required"),
 });
 
 // Export both schemas

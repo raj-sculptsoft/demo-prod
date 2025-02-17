@@ -49,3 +49,48 @@ export const getFormSelectOptions = createAsyncThunk(
     });
   },
 );
+
+export const getFormSelectProductOptions = createAsyncThunk(
+  "get-form-select-product-options",
+  async ({ request }: { request: string }) => {
+    return clientFetcher<{ list: StaticSelectOptions[] }>({
+      request,
+    });
+  },
+);
+
+export const getFormSelectRevenueOptions = createAsyncThunk(
+  "get-form-select-revenue-options",
+  async ({ request }: { request: string }) => {
+    return clientFetcher<{ list: StaticSelectOptions[] }>({
+      request,
+    });
+  },
+);
+
+export const getFormSelectCustomerOptions = createAsyncThunk(
+  "get-form-select-customer-options",
+  async ({ request }: { request: string }) => {
+    return clientFetcher<{ list: StaticSelectOptions[] }>({
+      request,
+    });
+  },
+);
+
+export const getFormSelectComplianceOptions = createAsyncThunk(
+  "get-form-select-compliance-options",
+  async ({ request }: { request: string }) => {
+    return clientFetcher<{ list: StaticSelectOptions[] }>({
+      request,
+    });
+  },
+);
+
+export const getFormSelectDependencyOptions = createAsyncThunk(
+  "get-form-select-dependency-options",
+  async ({ request }: { request: string }) => {
+    return clientFetcher<{ list: StaticSelectOptions[] }>({
+      request,
+    });
+  },
+);

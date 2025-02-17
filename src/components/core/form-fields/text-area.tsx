@@ -12,7 +12,7 @@ import { useFormContext } from "react-hook-form";
 
 interface IFormInputProps {
   name: string;
-  label: string;
+  label?: string;
   placeholder: string;
 }
 

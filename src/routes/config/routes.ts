@@ -43,7 +43,7 @@ const ROUTES = {
   VULNERABILITIES: {
     INDEX: "/vulnerabilities",
     VULNERABILITY_DETAILS:
-      "/vulnerability/:productId/:assetId/:vulnerabilityId/details",
+      "/vulnerability/product/:productId/asset/:assetId/vulnerability/:vulnerabilityId/details",
   },
   UPLOAD_REPORT: {
     INDEX: "/upload-report",

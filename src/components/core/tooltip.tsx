@@ -31,9 +31,10 @@ export default function CustomTooltip({
       <TooltipTrigger asChild={triggerAsChild}>{trigger}</TooltipTrigger>
       <TooltipContent
         asChild={contentAsChild}
-        className={`${contentWrapperClassName} max-w-[${maxWidth}] overflow-visible whitespace-normal break-words`}
+        className={`${contentWrapperClassName} overflow-visible whitespace-normal break-words`}
         side={side}
         align={align}
+        style={{ maxWidth }}
       >
         <TooltipPrimitive.Arrow height={6.5} />
         {content}

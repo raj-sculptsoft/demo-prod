@@ -1,6 +1,20 @@
-import { LinkAssets, Settings, TargetData, TargetList } from "@/types/settings";
+import {
+  DataAsset,
+  LinkAssets,
+  ProjectLink,
+  Settings,
+  TargetData,
+  TargetList,
+} from "@/types/settings";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { addOrEditSynk, addOrEditTargets, getSynk, getTargetList } from "./api";
+import {
+  addOrEditSynk,
+  addOrEditTargets,
+  fetchStatusById,
+  getProjectLink,
+  getSynk,
+  getTargetList,
+} from "./api";
 
 // Assuming IResponse is the response structure returned from the backend
 interface IResponse<T> {
@@ -14,9 +28,12 @@ export interface SynkState {
   loading: boolean;
   error: string | null;
   targets: TargetData | null;
+  linkProject: ProjectLink | null;
+  listAsset: DataAsset | null;
   targetListLoading: boolean;
   targetListError: string | null;
-  successMessage: string | null;
+  statusId: string | null;
+  statusReport: { data: { status: string }; message: string };
 }
 
 const initialState: SynkState = {
@@ -24,15 +41,33 @@ const initialState: SynkState = {
   loading: false,
   error: null,
   targets: null,
+  linkProject: null,
+  listAsset: null,
   targetListLoading: false,
   targetListError: null,
-  successMessage: null,
+  statusId: "",
+  statusReport: { data: { status: "" }, message: "" },
 };
 
 const synkSlice = createSlice({
   name: "synk",
   initialState,
-  reducers: {},
+  reducers: {
+    resetLinkProjectState: (state) => {
+      state.linkProject = null;
+    },
+    setStatusId: (state, action) => {
+      state.statusId = action.payload;
+    },
+    resetStatusId: (state) => {
+      state.statusId = "";
+    },
+    resetStatusReportState: (state) => {
+      state.statusReport = { data: { status: "" }, message: "" };
+      state.loading = false;
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getSynk.pending, (state) => {
@@ -91,14 +126,51 @@ const synkSlice = createSlice({
         addOrEditTargets.fulfilled,
         (state, action: PayloadAction<IResponse<LinkAssets>>) => {
           state.loading = false;
-          state.successMessage = action.payload.message;
+          state.listAsset = action.payload.data;
         },
       )
       .addCase(addOrEditTargets.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
+
+    builder
+      .addCase(getProjectLink.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        getProjectLink.fulfilled,
+        (state, action: PayloadAction<IResponse<ProjectLink>>) => {
+          state.loading = false;
+          state.linkProject = action.payload.data;
+        },
+      )
+      .addCase(getProjectLink.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
+    builder
+      .addCase(fetchStatusById.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchStatusById.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.statusReport.data.status = payload.data.status;
+        state.statusReport.message = payload.message;
+      })
+      .addCase(fetchStatusById.rejected, (state, { error }) => {
+        state.loading = false;
+        state.error = error.message as string;
+      });
   },
 });
 
+export const {
+  resetLinkProjectState,
+  setStatusId,
+  resetStatusId,
+  resetStatusReportState,
+} = synkSlice.actions;
 export default synkSlice.reducer;

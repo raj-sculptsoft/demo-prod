@@ -37,7 +37,7 @@ export default function TopVulnerableAssets({
       }}
     >
       <DialogContent
-        className="max-w-2xl"
+        className="max-w-3xl"
         closeButtonClassName="-top-3 -right-3 border-2	rounded-full text-blue bg-white opacity-100 p-2"
       >
         <DialogHeader>

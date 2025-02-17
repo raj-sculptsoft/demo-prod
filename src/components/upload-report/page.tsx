@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -58,7 +59,7 @@ export default function UploadReport() {
   useEffect(() => {
     dispatch(
       getAllProducts({
-        company_id: import.meta.env.VITE_PUBLIC_COMPANY_ID,
+        company_id: config.COMPANY_ID,
         ...defaultPayloadForWithoutPagination,
       }),
     );
@@ -168,8 +169,8 @@ export default function UploadReport() {
                 <FormFileUpload
                   name="file"
                   label="Upload Scanned Report"
-                  acceptedFiles=".pdf, .doc, .docx, .csv, .json"
-                  description="Supported Formats: PDF, Docx, CSV or Json file "
+                  acceptedFiles=".pdf, .csv, .json"
+                  description="Supported Formats: PDF, CSV or Json file "
                 />
               </form>
             </Form>

@@ -1,4 +1,5 @@
 import SemGrepIcon from "@/assets/icons/semgrep";
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { getSynk } from "@/store/settings/api";
 import { useEffect, useState } from "react";
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import Layout from "./layout";
 
 export default function SettingsPage() {
-  const company_id = import.meta.env.VITE_PUBLIC_COMPANY_ID;
+  const company_id = config.COMPANY_ID;
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { data } = useAppSelector((state) => state.synk);

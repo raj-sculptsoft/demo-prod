@@ -8,12 +8,12 @@ export interface AssetData extends PaginatedListCommonResponse {
 export interface Asset {
   asset_id: string;
   asset_name: string;
-  program_language: string;
+  program_language_all_data: string[]; // Fix here
   product_id: string;
   no_of_vulnerability: number;
   no_of_file: number;
   products: Product;
-  program_language_data: ProgramLanguageData;
+  program_languages: ProgramLanguage[];
   created_at: string;
   updated_at: string;
   is_active: boolean;
@@ -22,15 +22,11 @@ export interface Asset {
   updated_by: string;
 }
 
-export interface ProgramLanguageData {
-  master_enum_uuid: string;
-  master_enum_type_id: number;
-  master_enum_id: number;
-  master_enum_name: string;
-  created_by: string;
-  updated_by: string;
-  created_at: string;
-  updated_at: string;
-  is_active: boolean;
-  is_archived: boolean;
+export interface ProgramLanguage {
+  program_languages_enum: {
+    master_enum_uuid: string;
+    master_enum_type_id: number;
+    master_enum_name: string;
+    master_enum_id: number;
+  };
 }

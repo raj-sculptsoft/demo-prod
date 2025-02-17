@@ -30,6 +30,11 @@ export enum SelectsEnum {
   Positivity = 4,
   FalsePositivityReason = 5,
   TruePositivityReason = 6,
+  Product_Live = 8,
+  Revenue_Impact = 9,
+  Customer_Data_Type = 10,
+  Compliance_Required = 11,
+  Dependency_Impact = 12,
 }
 
 export enum VULNERABILITY_DETAILS_SOURCE {

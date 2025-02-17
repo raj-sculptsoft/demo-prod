@@ -1,9 +1,10 @@
+import config from "@/config/env";
 import Stats from "./_components/stats";
 import Summary from "./_components/summary/summary";
 import Layout from "./layout";
 
 export default function Dashboard() {
-  const company_id = import.meta.env.VITE_PUBLIC_COMPANY_ID;
+  const company_id = config.COMPANY_ID;
 
   return (
     <Layout>

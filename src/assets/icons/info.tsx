@@ -4,8 +4,8 @@ const Info = (props: SVGElementProps) => {
   const { className, ...rest } = props;
   return (
     <svg
-      width="12"
-      height="13"
+      width="15"
+      height="15"
       viewBox="0 0 12 13"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -1,3 +1,17 @@
+// export interface DashboardStats {
+//   total_products: number;
+//   total_vulnerabilities: number;
+//   total_false_positives: number;
+//   total_true_positives: number;
+//   total_hours_saved: number;
+//   total_files: number;
+//   total_assets: number;
+//   critical_count: number;
+//   high_count: number;
+//   medium_count: number;
+//   low_count: number;
+// }
+
 export interface DashboardStats {
   total_products: number;
   total_vulnerabilities: number;
@@ -6,10 +20,14 @@ export interface DashboardStats {
   total_hours_saved: number;
   total_files: number;
   total_assets: number;
-  critical_count: number;
-  high_count: number;
-  medium_count: number;
-  low_count: number;
+  critical_false_count: number;
+  critical_true_count: number;
+  high_false_count: number;
+  high_true_count: number;
+  medium_false_count: number;
+  medium_true_count: number;
+  low_false_count: number;
+  low_true_count: number;
 }
 
 export interface DashboardVulnerabilities {

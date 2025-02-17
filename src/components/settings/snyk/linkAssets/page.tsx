@@ -1,7 +1,8 @@
+// LinkAssetsPage.tsx
 import CustomButton from "@/components/core/custom-button";
 import { FormMultiSelect } from "@/components/core/form-fields/multi-select";
 import { FormSelect } from "@/components/core/form-fields/select";
-import { Form } from "@/components/ui/form";
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -10,12 +11,19 @@ import {
 } from "@/lib/common";
 import { FormSchemaAPI } from "@/schemas/settings";
 import { getAllProducts } from "@/store/common/api";
-import { addOrEditTargets, getTargetList } from "@/store/settings/api";
+import {
+  addOrEditTargets,
+  fetchStatusById,
+  getProjectLink,
+  getTargetList,
+} from "@/store/settings/api";
+import { resetLinkProjectState, setStatusId } from "@/store/settings/slice";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form"; // NEW: Import FormProvider
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import ConfirmationDialog from "../../../core/dialog";
 import {
   Card,
   CardContent,
@@ -23,9 +31,17 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../ui/card";
-import ConfirmationDialog from "./_component/dialog";
+import LanguageSelectionDialog from "./_component/add-language";
 import TagList from "./_component/tag-list";
 import Layout from "./layout";
+
+interface PendingProject {
+  product_id: string;
+  product_name: string;
+  project_id: string;
+  project_name: string;
+  selected_languages: string[];
+}
 
 export default function LinkAssetsPage() {
   const dispatch = useAppDispatch();
@@ -35,33 +51,46 @@ export default function LinkAssetsPage() {
     resolver: zodResolver(FormSchemaAPI),
     defaultValues: {
       product_id: "",
-      snyk_target_id: [],
+      semgrep_project_id: [],
     },
   });
 
   const { reset, setValue, watch } = form;
   const { loading: productsLoading, data: { list: productsList = [] } = {} } =
     useAppSelector(({ common }) => common.products);
-  const { targetListLoading, targets } = useAppSelector(({ synk }) => synk);
+  const { targetListLoading, targets, linkProject } = useAppSelector(
+    ({ synk }) => synk,
+  );
   const targetsList = targets?.list || [];
 
   const [linkedData, setLinkedData] = useState<
     {
       product: string;
       product_id: string;
-      tags: { id: string; label: string }[];
+      tags: { id: string; label: string; program_language: string[] | null }[];
     }[]
   >([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [pendingProject, setPendingProject] = useState<PendingProject | null>(
+    null,
+  );
+  const [languageSelections, setLanguageSelections] = useState<
+    Record<string, string[]>
+  >({});
+  const [languageErrors, setLanguageErrors] = useState<{
+    [key: string]: string;
+  }>({});
 
   useEffect(() => {
     dispatch(
       getAllProducts({
-        company_id: import.meta.env.VITE_PUBLIC_COMPANY_ID,
+        company_id: config.COMPANY_ID,
         ...defaultPayloadForWithoutPagination,
       }),
     );
-    dispatch(getTargetList(import.meta.env.VITE_PUBLIC_COMPANY_ID));
+    dispatch(getProjectLink(config.COMPANY_ID));
+    dispatch(getTargetList(config.COMPANY_ID));
   }, [dispatch]);
 
   const sortedProductsList = useMemo(() => {
@@ -72,23 +101,90 @@ export default function LinkAssetsPage() {
     );
   }, [productsList]);
 
+  useEffect(() => {
+    if (linkProject && targets) {
+      const validTargetIds = new Set(
+        targets.list.map((target) => target.semgrep_project_id),
+      );
+
+      const transformedData = linkProject?.products
+        .map((product) => ({
+          product: product.product_name,
+          product_id: product.product_id,
+          tags: product.projects
+            .filter((project) => validTargetIds.has(project.project_id))
+            .map((project) => ({
+              id: project.project_id,
+              label: project.project_name,
+              program_language: Array.isArray(project.program_language)
+                ? project.program_language
+                : project.program_language
+                  ? [project.program_language]
+                  : null,
+            })),
+        }))
+        .filter((product) => product.tags.length > 0);
+
+      setLinkedData(transformedData);
+
+      const newLanguageSelections: Record<string, string[]> = {};
+      transformedData.forEach((product) => {
+        product.tags.forEach((tag) => {
+          if (tag.program_language) {
+            newLanguageSelections[tag.id] = tag.program_language;
+          }
+        });
+      });
+
+      setLanguageSelections(newLanguageSelections);
+    }
+  }, [linkProject, targets]);
+
+  const handleSave = () => {
+    const errors: { [key: string]: string } = {};
+
+    linkedData.forEach((item) => {
+      item.tags.forEach((tag) => {
+        if (!tag.program_language) {
+          errors[tag.id] = "Programming Language is required.";
+        }
+      });
+    });
+
+    setLanguageErrors(errors);
+
+    if (Object.keys(errors).length === 0) {
+      setShowDialog(true);
+    }
+  };
+
   const handleDialogConfirm = async () => {
     try {
       const payload = {
         products: linkedData.map((item) => ({
           product_id: item.product_id,
-          targets: item.tags.map((tag) => ({
-            target_id: tag.id,
-            target_name: tag.label,
+          projects: item.tags.map((tag) => ({
+            project_id: tag.id,
+            project_name: tag.label,
+            program_language: tag.program_language || null,
           })),
         })),
       };
 
-      const { message } = await dispatch(addOrEditTargets(payload)).unwrap();
-      toast({
-        title: message,
-      });
-      navigate(`/vulnerabilities?product=${linkedData[0]?.product_id}`);
+      const { data } = await dispatch(addOrEditTargets(payload)).unwrap();
+      dispatch(resetLinkProjectState());
+      const statusId = data.list[0]?.status_id;
+      if (statusId) {
+        dispatch(setStatusId(statusId));
+        await dispatch(fetchStatusById(statusId));
+      }
+      if (linkedData.length > 0 && (linkedData[0]?.tags ?? []).length > 1) {
+        navigate(`/vulnerabilities?product=${data.list[0]?.product_id}`);
+      } else {
+        navigate(
+          `/vulnerabilities?product=${data.list[0]?.product_id}&asset=${data.list[0]?.asset_id}`,
+        );
+      }
       setLinkedData([]);
     } catch (error) {
       toast({
@@ -105,47 +201,116 @@ export default function LinkAssetsPage() {
     const selectedProduct = sortedProductsList.find(
       (product) => product.product_id === data.product_id,
     );
+
     const selectedTargets = targetsList.filter((target) =>
-      data.snyk_target_id.includes(target.snyk_target_id),
+      data.semgrep_project_id.includes(target.semgrep_project_id),
     );
 
     if (selectedProduct) {
-      setLinkedData((prev) => {
-        const existingIndex = prev.findIndex(
-          (item) => item.product_id === selectedProduct.product_id,
-        );
+      const tagList = selectedTargets.map((target) => {
+        let selectedLanguage: string[] | null = null;
 
-        if (existingIndex > -1) {
-          // Update existing product's tag list
-          const updatedTags = selectedTargets.map((target) => ({
-            id: target.snyk_target_id,
-            label: target.snyk_target_name,
-          }));
-
-          const updatedLinkedData = [...prev];
-          if (updatedLinkedData[existingIndex]) {
-            updatedLinkedData[existingIndex].tags = updatedTags;
-          }
-          return updatedLinkedData;
+        const targetLanguage = languageSelections[target.semgrep_project_id];
+        if (targetLanguage !== undefined) {
+          selectedLanguage = Array.isArray(targetLanguage)
+            ? targetLanguage
+            : [targetLanguage];
         }
 
-        // Add new product with targets
+        const productInLinked = linkedData.find(
+          (item) => item.product_id === selectedProduct.product_id,
+        );
+        if (productInLinked) {
+          const existingTag = productInLinked.tags.find(
+            (tag) => tag.id === target.semgrep_project_id,
+          );
+
+          if (existingTag?.program_language) {
+            selectedLanguage = Array.isArray(existingTag.program_language)
+              ? existingTag.program_language
+              : [existingTag.program_language]; // Ensure it's an array
+          }
+        }
+        return {
+          id: target.semgrep_project_id,
+          label: target.semgrep_project_name,
+          program_language: selectedLanguage,
+        };
+      });
+
+      setLinkedData((prev) => {
+        const otherProducts = prev.filter(
+          (item) => item.product_id !== selectedProduct.product_id,
+        );
         return [
-          ...prev,
           {
             product: selectedProduct.product_name,
             product_id: selectedProduct.product_id,
-            tags: selectedTargets.map((target) => ({
-              id: target.snyk_target_id,
-              label: target.snyk_target_name,
-            })),
+            tags: tagList,
           },
+          ...otherProducts,
         ];
       });
     }
 
     reset();
   };
+
+  const handleLanguageSelect = (program_language: string[]) => {
+    if (pendingProject) {
+      setLanguageSelections((prev) => ({
+        ...prev,
+        [pendingProject.project_id]: program_language,
+      }));
+
+      setLinkedData((prev) =>
+        prev.map((product) => {
+          if (product.product_id === pendingProject.product_id) {
+            return {
+              ...product,
+              tags: product.tags.map((tag) =>
+                tag.id === pendingProject.project_id
+                  ? { ...tag, program_language }
+                  : tag,
+              ),
+            };
+          }
+          return product;
+        }),
+      );
+    }
+    setLanguageErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      if (pendingProject) {
+        delete updatedErrors[pendingProject.project_id];
+      }
+      return updatedErrors;
+    });
+    setShowLanguageModal(false);
+  };
+
+  const handleEditLanguage = (projectId: string) => {
+    const productItem = linkedData.find((item) =>
+      item.tags.some((tag) => tag.id === projectId),
+    );
+    if (productItem) {
+      const project = productItem.tags.find((tag) => tag.id === projectId);
+      if (project) {
+        const selectedLanguages =
+          languageSelections[projectId] || project.program_language || [];
+
+        setPendingProject({
+          product_id: productItem.product_id,
+          product_name: productItem.product,
+          project_id: project.id,
+          project_name: project.label,
+          selected_languages: selectedLanguages,
+        });
+        setShowLanguageModal(true);
+      }
+    }
+  };
+
   const handleTagRemove = (productId: string, tagId: string) => {
     setLinkedData((prev) =>
       prev
@@ -157,10 +322,20 @@ export default function LinkAssetsPage() {
               }
             : item,
         )
-        .filter(
-          (item) => item.tags.length > 0 || item.product_id !== productId,
-        ),
+        .filter((item) => item.tags.length > 0),
     );
+
+    setLanguageSelections((prev) => {
+      const newSelections = { ...prev };
+      delete newSelections[tagId];
+      return newSelections;
+    });
+
+    setLanguageErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[tagId];
+      return newErrors;
+    });
   };
 
   const unselectedTargets = useMemo(() => {
@@ -169,7 +344,7 @@ export default function LinkAssetsPage() {
       .flatMap((item) => item.tags.map((tag) => tag.id));
 
     return targetsList.filter(
-      (target) => !selectedTargets.includes(target.snyk_target_id),
+      (target) => !selectedTargets.includes(target.semgrep_project_id),
     );
   }, [linkedData, targetsList, watch("product_id")]);
 
@@ -181,9 +356,9 @@ export default function LinkAssetsPage() {
 
     if (existingProduct) {
       const tags = existingProduct.tags.map((tag) => tag.id);
-      setValue("snyk_target_id", tags as [string, ...string[]]);
+      setValue("semgrep_project_id", tags as [string, ...string[]]);
     } else {
-      setValue("snyk_target_id", [] as unknown as [string, ...string[]]);
+      setValue("semgrep_project_id", [] as unknown as [string, ...string[]]);
     }
   }, [watch("product_id"), linkedData, setValue]);
 
@@ -195,7 +370,7 @@ export default function LinkAssetsPage() {
             <CardTitle className="text-lg font-semibold">Link Assets</CardTitle>
           </CardHeader>
           <CardContent className="px-5 py-7">
-            <Form {...form}>
+            <FormProvider {...form}>
               <form
                 id="link-assets-form"
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -219,24 +394,24 @@ export default function LinkAssetsPage() {
                   )}
                 />
                 <FormMultiSelect
-                  name="snyk_target_id"
+                  name="semgrep_project_id"
                   label="Select Project"
                   placeholder="Select Project"
                   isLoading={targetListLoading}
                   options={getSelectOptions(
                     unselectedTargets.map((item) => ({
                       ...item,
-                      snyk_target_name:
-                        item.snyk_target_name.length > 70
-                          ? `${item.snyk_target_name.slice(0, 70)}...`
-                          : item.snyk_target_name,
+                      semgrep_project_name:
+                        item.semgrep_project_name.length > 70
+                          ? `${item.semgrep_project_name.slice(0, 70)}...`
+                          : item.semgrep_project_name,
                     })),
-                    "snyk_target_name",
-                    "snyk_target_id",
+                    "semgrep_project_name",
+                    "semgrep_project_id",
                   )}
                 />
               </form>
-            </Form>
+            </FormProvider>
           </CardContent>
           <CardFooter className="block text-start">
             <CustomButton
@@ -266,6 +441,8 @@ export default function LinkAssetsPage() {
               <TagList
                 tags={item.tags}
                 onTagRemove={(tagId) => handleTagRemove(item.product_id, tagId)}
+                onTagEdit={handleEditLanguage}
+                languageErrors={languageErrors}
               />
             </CardContent>
           </Card>
@@ -274,10 +451,7 @@ export default function LinkAssetsPage() {
 
       {linkedData.some((item) => item.tags.length > 0) && (
         <CardFooter className="ml-[-20px] mt-4 block text-start">
-          <CustomButton
-            className="px-14 py-6"
-            onClick={() => setShowDialog(true)}
-          >
+          <CustomButton className="px-14 py-6" onClick={() => handleSave()}>
             Save
           </CustomButton>
         </CardFooter>
@@ -287,9 +461,18 @@ export default function LinkAssetsPage() {
         <ConfirmationDialog
           open={true}
           title="Confirmation Required"
-          description="Are you sure you want to proceed with this actions?"
+          description="Are you sure you want to proceed with these actions?"
           onConfirm={handleDialogConfirm}
           onCancel={() => setShowDialog(false)}
+        />
+      )}
+
+      {showLanguageModal && pendingProject && (
+        <LanguageSelectionDialog
+          open={true}
+          onClose={() => setShowLanguageModal(false)}
+          onConfirm={handleLanguageSelect}
+          selectedProject={pendingProject}
         />
       )}
     </Layout>

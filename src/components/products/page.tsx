@@ -1,3 +1,4 @@
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { getProductStats } from "@/store/products/api";
 import { useEffect } from "react";
@@ -7,7 +8,7 @@ import Stats from "./_components/stats";
 import Layout from "./layout";
 
 export default function Products() {
-  const company_id = import.meta.env.VITE_PUBLIC_COMPANY_ID;
+  const company_id = config.COMPANY_ID;
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector(({ products }) => products.stats);
 

@@ -19,7 +19,7 @@ export default function Layout({ children, params }: Props) {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
-  const hasFiltersApplied = queryParams.has("type");
+  const hasFiltersApplied = queryParams.get("type") === "True";
 
   const dispatch = useAppDispatch();
   const { data: assetData } = useAppSelector(

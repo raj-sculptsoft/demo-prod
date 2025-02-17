@@ -1,5 +1,7 @@
 import {
+  FetchStatusResponse,
   LinkAssets,
+  ProjectLink,
   Settings,
   SyncPayload,
   TargetList,
@@ -54,7 +56,7 @@ export const getTargetList = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await clientFetcher<TargetList>({
-        request: `ProjectList/${id}`,
+        request: `Semgrep/ProjectList/${id}`,
         method: "GET",
       });
       return response;
@@ -72,9 +74,10 @@ export const addOrEditTargets = createAsyncThunk(
     payload: {
       products: {
         product_id: string;
-        targets: {
-          target_id: string;
-          target_name: string;
+        projects: {
+          project_id: string;
+          project_name: string;
+          program_language: string[] | null;
         }[];
       }[];
     },
@@ -82,7 +85,7 @@ export const addOrEditTargets = createAsyncThunk(
   ) => {
     try {
       const response = await clientFetcher<LinkAssets>({
-        request: "LinkProject/AddUpdateTargets",
+        request: "Semgrep/LinkProject/AddUpdateProjects",
         method: "POST",
         payload,
       });
@@ -91,6 +94,38 @@ export const addOrEditTargets = createAsyncThunk(
       return rejectWithValue(
         (error as { message: string })?.message ?? "An error occurred",
       );
+    }
+  },
+);
+
+export const getProjectLink = createAsyncThunk(
+  "synk/getProjectLink",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await clientFetcher<ProjectLink>({
+        request: `Semgrep/MappedProject/${id}`,
+        method: "GET",
+      });
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        (error as { message: string })?.message ?? "An error occurred",
+      );
+    }
+  },
+);
+
+export const fetchStatusById = createAsyncThunk(
+  "fetch-status-by-id",
+  async (statusId: string, { rejectWithValue }) => {
+    try {
+      const response = await clientFetcher<FetchStatusResponse>({
+        request: `Semgrep/Status/${statusId}`,
+        method: "GET",
+      });
+      return response;
+    } catch (error) {
+      return rejectWithValue(error);
     }
   },
 );

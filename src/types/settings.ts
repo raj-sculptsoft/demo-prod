@@ -4,6 +4,7 @@ export interface Settings {
   company_id: string;
   third_party_integrations_id: string;
   integration_data: IntegrationData;
+  sync_period: number | null;
   is_active: boolean;
   is_archived: boolean;
   created_by: string;
@@ -36,6 +37,7 @@ export interface SyncPayload {
       api_token: string;
     };
   };
+  sync_period: number | null;
 }
 
 export interface TargetList {
@@ -49,13 +51,62 @@ export interface TargetData {
   list: List[];
 }
 
-export interface List {
-  snyk_target_id: string;
-  snyk_target_name: string;
-}
+// export interface List {
+//   snyk_target_id: string;
+//   snyk_target_name: string;
+// }
 
+export interface List {
+  semgrep_project_id: string;
+  semgrep_project_name: string;
+}
 export interface LinkAssets {
   success: number;
   message: string;
-  data: null;
+  data: DataAsset;
+  list: ListAsset[];
+}
+
+export interface DataAsset {
+  list: ListAsset[];
+}
+
+export interface ListAsset {
+  product_id: string;
+  asset_id: string;
+  project_id: string;
+  project_name: string;
+  status_id: string;
+}
+
+export interface ProjectLink {
+  success: number;
+  message: string;
+  data: Data;
+  products: Product[];
+}
+
+export interface Data {
+  products: Product[];
+}
+
+export interface Product {
+  product_id: string;
+  product_name: string;
+  projects: Project[];
+}
+
+export interface Project {
+  project_id: string;
+  project_name: string;
+  program_language: string[];
+}
+
+export interface FetchStatusResponse {
+  status: string;
+  success: number;
+  message: string;
+  data: {
+    status: string;
+  };
 }

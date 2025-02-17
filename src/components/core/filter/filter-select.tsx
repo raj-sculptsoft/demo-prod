@@ -36,7 +36,6 @@ export default function FilterSelect({
   const [selectValue, setSelectValue] = useState(
     queryParams.get(name) ?? defaultValue,
   );
-
   useEffect(() => {
     setSelectValue(queryParams.get(name) ?? defaultValue);
   }, [queryParams.get(name)]);
@@ -61,11 +60,24 @@ export default function FilterSelect({
         disabled={disabled || isLoading}
       >
         <SelectTrigger className="bg h-full w-full rounded-none border-0 font-bold text-secondary focus:ring-0 focus:ring-offset-0">
-          <SelectValue placeholder={placeholder} />
+          {selectValue ? (
+            <span>
+              {(() => {
+                const selectedOption = options.find(
+                  (option) => option.value === selectValue,
+                );
+                const label = selectedOption?.label ?? " ";
+                return label.length > 12 ? `${label.slice(0, 12)}...` : label;
+              })()}
+            </span>
+          ) : (
+            <SelectValue placeholder={placeholder} />
+          )}
           {isLoading && (
             <Loader2 className="ml-auto mr-1 h-4 w-4 animate-spin opacity-70" />
           )}
         </SelectTrigger>
+
         <SelectContent className="p-0">
           <SelectGroup className="w-[250px]">
             {options.map(({ label, value }, index) => (

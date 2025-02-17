@@ -1,4 +1,11 @@
-import { getFormSelectOptions } from "@/store/common/api";
+import {
+  getFormSelectComplianceOptions,
+  getFormSelectCustomerOptions,
+  getFormSelectDependencyOptions,
+  getFormSelectOptions,
+  getFormSelectProductOptions,
+  getFormSelectRevenueOptions,
+} from "@/store/common/api";
 import { useEffect } from "react";
 import CustomButton from "../../../components/core/custom-button";
 import { useAppDispatch } from "../../../hooks/use-store";
@@ -12,6 +19,31 @@ export default function AddProduct() {
     dispatch(
       getFormSelectOptions({
         request: `Enum/${SelectsEnum["Target_Audience"]}`,
+      }),
+    );
+    dispatch(
+      getFormSelectProductOptions({
+        request: `Enum/${SelectsEnum["Product_Live"]}`,
+      }),
+    );
+    dispatch(
+      getFormSelectRevenueOptions({
+        request: `Enum/${SelectsEnum["Revenue_Impact"]}`,
+      }),
+    );
+    dispatch(
+      getFormSelectCustomerOptions({
+        request: `Enum/${SelectsEnum["Customer_Data_Type"]}`,
+      }),
+    );
+    dispatch(
+      getFormSelectComplianceOptions({
+        request: `Enum/${SelectsEnum["Compliance_Required"]}`,
+      }),
+    );
+    dispatch(
+      getFormSelectDependencyOptions({
+        request: `Enum/${SelectsEnum["Dependency_Impact"]}`,
       }),
     );
   }, [dispatch]);

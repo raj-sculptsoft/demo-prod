@@ -1,6 +1,6 @@
 import CustomButton from "@/components/core/custom-button";
 import FormInput from "@/components/core/form-fields/input";
-import { FormSelect } from "@/components/core/form-fields/select";
+import { FormMultiSelect } from "@/components/core/form-fields/multi-select";
 import { Form } from "@/components/ui/form";
 import {
   Sheet,
@@ -33,7 +33,7 @@ export default function AssetForm() {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       asset_name: "",
-      program_language: "",
+      program_language_all_data: [],
     },
   });
 
@@ -61,11 +61,17 @@ export default function AssetForm() {
 
   useEffect(() => {
     if (editFormData) {
-      reset(editData);
+      reset({
+        asset_name: editData?.asset_name || "",
+        program_language_all_data:
+          editData?.program_languages?.map(
+            (lang) => lang.program_languages_enum.master_enum_uuid,
+          ) || [],
+      });
     } else {
       reset({
         asset_name: "",
-        program_language: "",
+        program_language_all_data: [],
       });
     }
   }, [editFormData, reset, editData]);
@@ -73,7 +79,7 @@ export default function AssetForm() {
   const onClose = (open: boolean) => {
     reset({
       asset_name: "",
-      program_language: "",
+      program_language_all_data: [],
     });
     dispatch(clearEditDetails());
     dispatch(setShowAssetForm(open));
@@ -81,13 +87,12 @@ export default function AssetForm() {
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
-      const payload = editData
-        ? {
-            ...data,
-            asset_id: (editData as Asset).asset_id,
-            product_id: productId,
-          }
-        : { ...data, product_id: productId };
+      const payload = {
+        asset_id: editData ? (editData as Asset).asset_id : undefined,
+        asset_name: data.asset_name,
+        product_id: productId,
+        program_language_all_data: data.program_language_all_data || [], // Ensure array is sent
+      };
 
       const { message } = await dispatch(addOrEditAsset(payload)).unwrap();
       toast({ title: message });
@@ -136,7 +141,7 @@ export default function AssetForm() {
               <form
                 id="product-form"
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="grid gap-y-5"
+                className="grid h-full gap-y-5"
               >
                 <p className="text-lg font-bold text-borderColor-dark">
                   Technical Stack
@@ -147,8 +152,8 @@ export default function AssetForm() {
                   placeholder="Asset Name"
                 />
 
-                <FormSelect
-                  name="program_language"
+                <FormMultiSelect
+                  name="program_language_all_data"
                   label="Programming Languages"
                   placeholder="Programming Languages"
                   isLoading={loading}

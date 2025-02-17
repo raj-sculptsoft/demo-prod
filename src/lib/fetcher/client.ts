@@ -1,3 +1,4 @@
+import config from "@/config/env";
 import axios from "axios";
 import type { FetcherProps, IError, IResponse } from "./types";
 
@@ -6,7 +7,7 @@ interface ClientFetcherProps extends FetcherProps {
   baseURL?: string;
   params?: Record<string, string | number>;
 }
-const URL = import.meta.env.VITE_PUBLIC_API_URL + "/api/";
+const URL = config.VITE_PUBLIC_API_URL + "/api/";
 
 const fetcherInstance = axios.create({
   baseURL: URL,

@@ -1,3 +1,12 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   FormControl,
   FormField,
@@ -6,25 +15,27 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2, X } from "lucide-react";
-import { useState } from "react";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
-interface IFormMultiSelectProps {
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface FormMultiSelectProps {
   name: string;
   label: string;
   placeholder: string;
   isLoading?: boolean;
-  disabled?: boolean;
-  options: { label: string; value: string }[];
+  options: Option[];
   onChange?: (newValue: string[]) => void;
+  onDropdownOpenChange?: (isOpen: boolean) => void;
 }
 
 export function FormMultiSelect({
@@ -33,11 +44,16 @@ export function FormMultiSelect({
   placeholder,
   options = [],
   isLoading = false,
-  disabled = false,
   onChange = () => {},
-}: IFormMultiSelectProps) {
+  onDropdownOpenChange,
+}: FormMultiSelectProps) {
   const { control } = useFormContext();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const buttonRef = React.useRef<HTMLButtonElement | null>(null);
+
+  React.useEffect(() => {
+    onDropdownOpenChange?.(isOpen);
+  }, [isOpen, onDropdownOpenChange]);
 
   return (
     <FormField
@@ -46,7 +62,6 @@ export function FormMultiSelect({
       render={({ field }) => {
         const { value = [], onChange: fieldOnChange } = field;
 
-        // Ensure value is always an array
         const safeValue = Array.isArray(value) ? value : [];
 
         const handleValueChange = (
@@ -58,100 +73,107 @@ export function FormMultiSelect({
           const newValue = safeValue.includes(optionValue)
             ? safeValue.filter((v) => v !== optionValue)
             : [...safeValue, optionValue];
-          fieldOnChange(newValue); // Update form state
-          onChange(newValue); // Notify parent component
+          fieldOnChange(newValue);
+          onChange(newValue);
+          setIsOpen(true);
         };
 
         const removeTag = (optionValue: string) => {
-          handleValueChange(optionValue); // Remove the value when "X" is clicked
+          handleValueChange(optionValue);
+          setIsOpen(false);
         };
 
         return (
           <FormItem>
             <FormLabel>{label}</FormLabel>
             <FormControl>
-              <div>
-                <Select
-                  value=""
-                  open={isOpen}
-                  onOpenChange={setIsOpen}
-                  disabled={disabled || isLoading}
-                  onValueChange={(selectedValue) =>
-                    handleValueChange(selectedValue)
-                  }
-                >
-                  <SelectTrigger
-                    className={`text-border-dark ${
-                      safeValue.length > 0
-                        ? "text-secondary"
-                        : "text-borderColor-dark"
-                    } h-12 rounded bg-bodyBackground focus:ring-0 focus:ring-offset-0`}
-                  >
-                    <SelectValue placeholder={placeholder} />
-                    {isLoading && (
-                      <Loader2 className="ml-auto mr-2 h-4 w-4 animate-spin opacity-70" />
-                    )}
-                  </SelectTrigger>
-                  <SelectContent
+              <>
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      ref={buttonRef}
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isOpen}
+                      className="h-12 w-full justify-between bg-gray-100 hover:bg-gray-100"
+                    >
+                      <span
+                        className={`ml-[-15px] truncate font-normal ${
+                          safeValue.length === 0 ? "text-borderColor-dark" : ""
+                        }`}
+                      >
+                        {safeValue.length === 0
+                          ? placeholder
+                          : `${safeValue.length} selected`}
+                      </span>
+
+                      {isLoading && (
+                        <Loader2 className="ml-auto h-4 w-4 animate-spin opacity-20" />
+                      )}
+                      <ChevronsUpDown className="mr-[-15px] h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
                     className="p-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    style={{
+                      width: buttonRef.current
+                        ? `${buttonRef.current.offsetWidth}px`
+                        : "auto",
                     }}
                   >
-                    <SelectGroup>
-                      {options.length === 0 && (
-                        <SelectItem disabled value="empty">
-                          No Options
-                        </SelectItem>
-                      )}
-                      {options.map(({ label, value: optionValue }) => (
-                        <SelectItem
-                          key={optionValue}
-                          value={optionValue}
-                          onClick={(e) => {
-                            handleValueChange(optionValue, e);
-                          }}
-                          className={`flex items-center ${
-                            safeValue.includes(optionValue) ? "font-bold" : ""
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            readOnly
-                            checked={safeValue.includes(optionValue)}
-                            className="mr-3"
-                          />
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                    <Command className="max-h-[230px]">
+                      <CommandList>
+                        <CommandEmpty>No options found.</CommandEmpty>
+                        <CommandGroup>
+                          {options.map(
+                            (
+                              { value: optionValue, label: optionLabel },
+                              index,
+                            ) => (
+                              <CommandItem
+                                key={optionValue}
+                                onSelect={() => handleValueChange(optionValue)}
+                                className={`flex h-12 items-center font-normal hover:bg-slate-100 ${index < options.length - 1 ? "border-b" : ""} ${safeValue.includes(optionValue) ? "font-medium" : ""}`}
+                              >
+                                <div
+                                  className={`mr-2 flex h-4 w-4 items-center justify-center rounded border ${safeValue.includes(optionValue) ? "border-primary bg-primary" : "border-gray-400"}`}
+                                >
+                                  {safeValue.includes(optionValue) && (
+                                    <Check className="h-5 w-8 text-white" />
+                                  )}
+                                </div>
+                                {optionLabel}
+                              </CommandItem>
+                            ),
+                          )}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
 
                 {/* Selected Tags */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {safeValue.map((selected) => {
                     const option = options.find((o) => o.value === selected);
                     return (
-                      <div
+                      <Badge
                         key={selected}
-                        className="flex items-center gap-1 rounded-sm bg-gray-100 px-3 py-1 text-sm"
+                        variant="secondary"
+                        className="flex h-8 items-center gap-1 rounded-sm text-sm font-normal"
                       >
-                        <span>{option?.label}</span>
+                        {option?.label}
                         <button
                           onClick={() => removeTag(selected)}
-                          className="rounded-full p-0.5 transition-colors hover:bg-gray-200"
+                          className="ml-1 rounded-full outline-none"
                         >
-                          <X className="h-3 w-3" />
-                          <span className="sr-only">
-                            Remove {option?.label}
-                          </span>
+                          <X className="text-muted-foreground hover:text-foreground h-4 w-4" />
                         </button>
-                      </div>
+                      </Badge>
                     );
                   })}
                 </div>
-              </div>
+              </>
             </FormControl>
             <FormMessage />
           </FormItem>

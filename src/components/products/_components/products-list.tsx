@@ -1,5 +1,6 @@
+import config from "@/config/env";
 import { getListForTable } from "@/store/common/api";
-import { deleteProduct } from "@/store/products/api";
+import { deleteProduct, getProductStats } from "@/store/products/api";
 import {
   resetList,
   setEditDetails,
@@ -30,7 +31,7 @@ import { Product } from "../../../types/products";
 
 const columns = [
   { key: "product_name", label: "Product Name" },
-  { key: "created_at", label: "Created Date" },
+  { key: "created_at", label: "Created Date/Time" },
   { key: "no_of_asset", label: "No. of Assets" },
 ];
 
@@ -57,19 +58,27 @@ export default function ProductsList() {
   }, [productSearch, dispatch]);
 
   useEffect(() => {
-    dispatch(
-      getListForTable({
-        request: "Product/List",
-        payload: {
-          search: productSearch,
-          order_by: column,
-          sort_by: direction,
-          page_index: page,
-          page_size: rowsPerPage,
-          company_id: import.meta.env.VITE_PUBLIC_COMPANY_ID,
-        },
-      }),
-    );
+    window.scrollTo(0, 0);
+  }, [list]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      dispatch(
+        getListForTable({
+          request: "Product/List",
+          payload: {
+            search: productSearch,
+            order_by: column,
+            sort_by: direction,
+            page_index: page,
+            page_size: rowsPerPage,
+            company_id: config.COMPANY_ID,
+          },
+        }),
+      );
+    }, 50);
+
+    return () => clearTimeout(timeout);
   }, [column, direction, dispatch, page, rowsPerPage, productSearch]);
 
   useEffect(() => {
@@ -101,10 +110,12 @@ export default function ProductsList() {
             sort_by: direction,
             page_index: newPage,
             page_size: rowsPerPage,
-            company_id: import.meta.env.VITE_PUBLIC_COMPANY_ID,
+            company_id: config.COMPANY_ID,
           },
         }),
       );
+
+      dispatch(getProductStats(config.COMPANY_ID));
     } catch (error) {
       toast({
         title: (error as IError)?.message ?? "Something went wrong",

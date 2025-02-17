@@ -19,7 +19,7 @@ const FormSchema = z.object({
         return validMimeTypes.includes(file?.type);
       },
       {
-        message: "Invalid file type. Allowed types: PDF, DOC, DOCX, CSV, JSON",
+        message: "Invalid file type. Allowed types: PDF, CSV, JSON",
       },
     ),
 });

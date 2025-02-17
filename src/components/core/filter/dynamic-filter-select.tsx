@@ -1,5 +1,6 @@
 import FilterSelect from "@/components/core/filter/filter-select";
 import FilterSeparator from "@/components/core/filter/filter-separator";
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import {
   defaultPayloadForWithoutPagination,
@@ -41,7 +42,7 @@ export default function DynamicFilterSelect({
   useEffect(() => {
     dispatch(
       getAllProducts({
-        company_id: import.meta.env.VITE_PUBLIC_COMPANY_ID,
+        company_id: config.COMPANY_ID,
         ...defaultPayloadForWithoutPagination,
       }),
     );

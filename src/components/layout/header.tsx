@@ -29,7 +29,7 @@ export default function Header({
                     <BreadcrumbLink asChild>
                       <Link
                         to={href}
-                        className={`inline-block max-w-[200px] truncate font-medium ${
+                        className={`inline-block max-w-[1200px] truncate font-medium ${
                           hasMoreThanOneLinks
                             ? "underline decoration-solid decoration-1 underline-offset-1"
                             : ""

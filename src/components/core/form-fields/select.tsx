@@ -61,7 +61,13 @@ export function FormSelect({
                 <SelectTrigger
                   className={`text-border-dark ${field.value ? "text-secondary" : "text-borderColor-dark"} h-12 rounded bg-bodyBackground focus:ring-0 focus:ring-offset-0`}
                 >
-                  <SelectValue placeholder={placeholder} />
+                  <SelectValue
+                    placeholder={
+                      placeholder.length > 50
+                        ? `${placeholder.slice(0, 50)}...`
+                        : placeholder
+                    }
+                  />
                   {isLoading && (
                     <Loader2 className="ml-auto mr-2 h-4 w-4 animate-spin opacity-70" />
                   )}

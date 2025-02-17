@@ -14,25 +14,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
+  const isTypeTrue = queryParams.get("type") === "True";
   const hasFiltersApplied =
-    queryParams.has("product") ||
-    queryParams.has("asset") ||
-    queryParams.has("type");
+    queryParams.has("product") || queryParams.has("asset") || isTypeTrue;
 
   const { data: reportData } = useAppSelector(
     (state) => state.uploadReport.reportStatus,
   );
   const { reportId } = useAppSelector((state) => state.uploadReport);
 
+  const statusId = useAppSelector((state) => state.synk.statusId);
+  const { data: statusReportData } = useAppSelector(
+    (state) => state.synk.statusReport,
+  );
+
   const [showProcessingMessage, setShowProcessingMessage] = useState(false);
 
   useEffect(() => {
-    if (reportData.status === "In Progress" && reportId) {
+    // Show processing message if report is in progress and reportId exists
+    if (
+      (reportData.status === "In Progress" && reportId) ||
+      (statusReportData.status === "In Progress" && statusId)
+    ) {
       setShowProcessingMessage(true);
     } else {
       setShowProcessingMessage(false);
     }
-  }, [reportData, reportId]);
+  }, [reportData, statusReportData, reportId, statusId]);
 
   return (
     <>
@@ -40,7 +48,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {showProcessingMessage && (
           <div className="mx-auto mb-4 w-[1000px] bg-primary p-1 text-center text-white">
             <div className="flex items-center justify-center gap-2">
-              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
+              <div className="mr-2 h-3 w-3 animate-spin rounded-full border-4 border-white border-t-transparent"></div>
               <span>
                 Processing vulnerabilities. Results update as data comes in.
                 Progress won't show if you refresh, filter, or change. Please

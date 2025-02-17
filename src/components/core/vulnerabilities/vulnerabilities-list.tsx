@@ -9,6 +9,7 @@ import { VULNERABILITY_DETAILS_SOURCE } from "@/lib/common";
 import { getFormattedDate } from "@/lib/date";
 import { getListForTable } from "@/store/common/api";
 import { resetTableData, setPage, setSorting } from "@/store/common/slice";
+import { resetStatusReportState } from "@/store/settings/slice";
 import { resetReportStatusState } from "@/store/upload-reports/slice";
 import { Asset } from "@/types/assets";
 import { Product } from "@/types/products";
@@ -48,12 +49,12 @@ export default function VulnerabilitiesList({
       { key: "id", label: "ID" },
       { key: "file_name", label: "File Name" },
       { key: "vulnerability", label: "Vulnerability" },
-      { key: "impact", label: "Impact" },
+      { key: "severity", label: "Severity" },
       { key: "confidence_score", label: "Confidence Score" },
       { key: "cwe", label: "CWE" },
       { key: "cve", label: "CVE" },
-      { key: "created_at", label: "Date Reported" },
-      { key: "updated_at", label: "Last Updated Date" },
+      { key: "created_at", label: "Reported Date/Time" },
+      { key: "updated_at", label: "Last Updated Date/Time" },
       { key: "assets", label: "Asset" },
       { key: "products", label: "Product" },
     ];
@@ -70,11 +71,19 @@ export default function VulnerabilitiesList({
     (state) => state.uploadReport.reportStatus,
   );
 
+  const { data: statusReportData } = useAppSelector(
+    (state) => state.synk.statusReport,
+  );
+
   const [initialLoad, setInitialLoad] = useState(false);
+  const [firstLoading, setFirstLoading] = useState(true);
 
   useEffect(() => {
     if (initialLoad && (productId || assetId)) {
+      setFirstLoading(true);
       dispatch(resetReportStatusState());
+
+      dispatch(resetStatusReportState());
     } else {
       setInitialLoad(true);
     }
@@ -99,6 +108,16 @@ export default function VulnerabilitiesList({
     };
 
     if (reportData.status === "In Progress") {
+      setFirstLoading(false);
+      const interval = setInterval(fetchListForTable, 15000);
+
+      return () => clearInterval(interval);
+    } else {
+      fetchListForTable();
+    }
+
+    if (statusReportData.status === "In Progress") {
+      setFirstLoading(false);
       const interval = setInterval(fetchListForTable, 15000);
 
       return () => clearInterval(interval);
@@ -108,6 +127,7 @@ export default function VulnerabilitiesList({
 
     return () => {};
   }, [
+    statusReportData.status,
     reportData.status,
     column,
     direction,
@@ -126,6 +146,10 @@ export default function VulnerabilitiesList({
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [list]);
+
   const onViewDetails = useCallback(
     (
       { product_id }: Product,
@@ -135,12 +159,17 @@ export default function VulnerabilitiesList({
       const navigateTo =
         source === VULNERABILITY_DETAILS_SOURCE.PRODUCT
           ? `/product/${product_id}/asset/${asset_id}/vulnerability/${vulnerability_id}/details`
-          : `/vulnerability/${product_id}/${asset_id}/${vulnerability_id}/details`;
+          : `/vulnerability/product/${product_id}/asset/${asset_id}/vulnerability/${vulnerability_id}/details`;
 
       navigate(navigateTo);
     },
     [navigate, source],
   );
+
+  const capitalizeFirstLetter = (str: string | undefined) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  };
 
   const headers = React.useMemo(
     () => (
@@ -210,12 +239,12 @@ export default function VulnerabilitiesList({
                 case "products": {
                   return (
                     <TableCell
-                      key={column.key}
+                      key={`${item.vulnerability_id}-${column.key}`}
                       className="max-w-20 overflow-hidden text-ellipsis whitespace-nowrap break-keep px-2"
                     >
                       <CustomTooltip
                         trigger={
-                          <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-center">
+                          <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
                             {item?.assets?.products?.product_name}
                           </span>
                         }
@@ -230,12 +259,12 @@ export default function VulnerabilitiesList({
                 case "assets": {
                   return (
                     <TableCell
-                      key={column.key}
+                      key={`${item.vulnerability_id}-${column.key}`}
                       className="max-w-20 overflow-hidden text-ellipsis whitespace-nowrap break-keep px-2"
                     >
                       <CustomTooltip
                         trigger={
-                          <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-center">
+                          <span className="block overflow-hidden text-ellipsis whitespace-nowrap">
                             {item?.assets?.asset_name}
                           </span>
                         }
@@ -247,47 +276,108 @@ export default function VulnerabilitiesList({
                   );
                 }
                 case "created_at": {
+                  const formattedDateTime = getFormattedDate(
+                    value as Vulnerability["created_at"],
+                  );
+                  const [date, time] = formattedDateTime.split(" ");
                   return (
                     <TableCell
-                      key={column.key}
-                      className="max-w-20 overflow-hidden text-ellipsis whitespace-nowrap break-keep px-2"
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-20 px-2"
                     >
-                      {getFormattedDate(value as Vulnerability["created_at"])}
+                      <div>{date}</div>
+                      <div className="text-sm">{time}</div>{" "}
                     </TableCell>
                   );
                 }
+
                 case "updated_at": {
+                  const formattedDateTime = getFormattedDate(
+                    value as Vulnerability["updated_at"],
+                  );
+                  const [date, time] = formattedDateTime.split(" ");
+
                   return (
-                    <TableCell key={column.key} className="max-w-20 px-2">
-                      {getFormattedDate(value as Vulnerability["updated_at"])}
+                    <TableCell
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-20 px-2"
+                    >
+                      <div>{date}</div>
+                      <div className="text-sm">{time}</div>{" "}
                     </TableCell>
                   );
                 }
-                case "impact": {
+
+                case "severity": {
+                  const severity = capitalizeFirstLetter(
+                    value as Vulnerability["severity"],
+                  );
                   return (
-                    <TableCell key={column.key} className="max-w-28 px-2">
-                      <Badge
-                        variant="outline"
-                        className={`${impactColor[value as keyof typeof impactColor]}`}
-                      >
-                        {value as Vulnerability["impact"]}
-                      </Badge>
+                    <TableCell
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-28 px-2"
+                    >
+                      {severity ? (
+                        <Badge
+                          variant="outline"
+                          className={
+                            impactColor[severity as keyof typeof impactColor]
+                          }
+                        >
+                          {severity}
+                        </Badge>
+                      ) : (
+                        "N/A"
+                      )}
                     </TableCell>
                   );
                 }
                 case "confidence_score": {
                   return (
-                    <TableCell key={column.key} className="max-w-28 px-2">
+                    <TableCell
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-28 px-2"
+                    >
                       {value !== undefined && value !== null
                         ? `${value as ReactNode}%`
                         : "N/A"}
                     </TableCell>
                   );
                 }
+                case "cve": {
+                  return (
+                    <TableCell
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-32 overflow-hidden text-ellipsis whitespace-nowrap px-2"
+                    >
+                      {value !== undefined &&
+                      value !== null &&
+                      value !== "" &&
+                      value !== "N/A"
+                        ? (value as ReactNode)
+                        : "No CVE assigned"}
+                    </TableCell>
+                  );
+                }
+                case "cwe": {
+                  return (
+                    <TableCell
+                      key={`${item.vulnerability_id}-${column.key}`}
+                      className="max-w-32 overflow-hidden text-ellipsis whitespace-nowrap px-2"
+                    >
+                      {value !== undefined &&
+                      value !== null &&
+                      value !== "" &&
+                      value !== "N/A"
+                        ? (value as ReactNode)
+                        : "No CWE assigned"}
+                    </TableCell>
+                  );
+                }
                 default:
                   return (
                     <TableCell
-                      key={column.key}
+                      key={`${item.vulnerability_id}-${column.key}`}
                       className="max-w-32 overflow-hidden text-ellipsis whitespace-nowrap px-2"
                     >
                       {value !== undefined && value !== null && value !== ""
@@ -309,6 +399,7 @@ export default function VulnerabilitiesList({
       body={body}
       noOfColumns={columns.length + 1}
       rowSkeleton={<RowSkeleton noOfColumns={columns.length + 1} />}
+      firstLoading={firstLoading}
     />
   );
 }

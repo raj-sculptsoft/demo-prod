@@ -7,6 +7,7 @@ import DataTable from "@/components/core/data-table/table";
 import { DeleteDialog } from "@/components/core/delete-dialog";
 import CustomTooltip from "@/components/core/tooltip";
 import { TableCell, TableHead, TableRow } from "@/components/ui/table";
+import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { toast } from "@/hooks/use-toast";
 import { getFormattedDate } from "@/lib/date";
@@ -15,18 +16,20 @@ import { deleteAsset } from "@/store/assets/api";
 import { setEditDetails, setShowAssetForm } from "@/store/assets/slice";
 import { getListForTable } from "@/store/common/api";
 import {
+  clearAsset,
   resetTableData,
   setDeleteDialogOptions,
   setPage,
   setSorting,
 } from "@/store/common/slice";
+import { getProductStats } from "@/store/products/api";
 import { Asset } from "@/types/assets";
 import React, { useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // Updated imports
 
 const columns = [
   { key: "asset_name", label: "Asset Name" },
-  { key: "created_at", label: "Created Date" },
+  { key: "created_at", label: "Created Date/Time" },
   { key: "no_of_file", label: "No. of Files" },
   { key: "no_of_vulnerability", label: "No. of Vulnerabilities" },
 ];
@@ -53,6 +56,10 @@ export default function AssetsList() {
   useEffect(() => {
     dispatch(setPage(1));
   }, [search, dispatch]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [list]);
 
   useEffect(() => {
     dispatch(
@@ -87,6 +94,10 @@ export default function AssetsList() {
       const newPage =
         (list as Asset[]).length <= 1 && page > 1 ? page - 1 : page;
 
+      if ((list as Asset[]).length <= 1) {
+        dispatch(clearAsset());
+      }
+
       dispatch(setPage(newPage));
 
       dispatch(
@@ -102,6 +113,8 @@ export default function AssetsList() {
           },
         }),
       );
+
+      dispatch(getProductStats(config.COMPANY_ID));
     } catch (error) {
       toast({
         title: (error as IError)?.message ?? "Something went wrong",

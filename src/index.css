@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body[data-scroll-locked="1"] {
+  pointer-events: auto !important;
+}
+
 @layer base {
   :root {
     --sidebar-background: 0 0% 98%;
@@ -46,4 +50,14 @@
     0 4px 8px rgba(0, 0, 0, 0.1),
     0 6px 20px rgba(0, 0, 0, 0.15),
     inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Hide scrollbar but keep scrolling */
+.hidden-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer/Edge */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }
