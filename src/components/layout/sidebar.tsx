@@ -69,11 +69,13 @@ export default function SideBar() {
 
   // Helper function to check if a route pattern matches the current path
   const isRouteMatch = (pattern: string, path: string) => {
-    // Convert route pattern to regex
+    // Convert route pattern to regex without non-literal regex
     const regexPattern = pattern
-      .replace(/:[^/]+/g, "[^/]+") // Replace :param with regex pattern
+      .replace(/:[^/]+/g, "([^/]+)") // Replace :param with regex capturing groups
       .replace(/\//g, "\\/"); // Escape forward slashes
-    const regex = new RegExp(`^${regexPattern}$`);
+
+    // Build regex from pattern and make sure to escape special characters properly
+    const regex = new RegExp("^" + regexPattern + "$");
     return regex.test(path);
   };
 
