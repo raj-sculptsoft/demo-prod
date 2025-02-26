@@ -20,17 +20,22 @@ jobs:
         run: |
           npm install
       
-      # Step 3: Set API URL Based on GitHub Variable
+      # Step 3: Debug - Print GitHub Variable Before Assigning
+      - name: Debug - Print GitHub Variable
+        run: |
+          echo "GitHub Variable VITE_PUBLIC_API_URL_DEV: ${{ vars.VITE_PUBLIC_API_URL_DEV }}"
+      
+      # Step 4: Set API URL in Environment
       - name: Set API URL
         run: |
           echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
       
-      # Step 4: Print API URL (Should now correctly show the value)
-      - name: Print API URL
+      # Step 5: Debug - Print API URL After Assignment
+      - name: Debug - Print Assigned API URL
         run: |
           echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
 
-      # Step 5: Build the React App with Correct API URL
+      # Step 6: Build the React App with Correct API URL
       - name: Build React App
         run: |
           npm run build
