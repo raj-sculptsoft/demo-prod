@@ -1,104 +1,40 @@
-name: Deploy React App to GCP
+name: Build and Print Env
 
 on:
   push:
     branches:
-      - develop  # Trigger deployment on pushes to develop branch
-      - test-FE  # Trigger deployment on pushes to test-FE branch
+      - main  # Trigger on push to the main branch
+
 jobs:
-  deploy-dev:
+  build-and-check:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main'
 
     steps:
-    # Step 1: Checkout Code
-    - name: Checkout Code
-      uses: actions/checkout@v4
-    
-    # Step 2: Install Dependencies
-    - name: Install Dependencies
-      run: |
-        npm fund
-        npm install
-         
-    # Step 3: Build the React App
-    - name: Build React App
-      run: |
-        npm run build  # This generates the "dist" folder
-
-   # Debug Step: Print GCP IP (Be careful with sensitive information)
-    - name: Print GCP IP Without Masking
-      run: |
-        echo "GCP VM IP DEV: $(echo ${{ secrets.GCP_IP_DEV }} | sed 's/./& /g')"
-    
-    # Step 4: Set up SSH Key for GCP Deployment
-    - name: Set Up SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.GCP_SSH_FILE_DEV }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.GCP_IP_DEV }} >> ~/.ssh/known_hosts
-
-    # Step 5: Deploy Built Files and .env to GCP VM
-    - name: Deploy Built Files and .env to GCP VM
-      run: |
-        # Ensure correct permissions on the target directory
-        ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_DEV }} "sudo chown -R ${{ secrets.GCP_USER }}:www-data /var/www/html && sudo chmod -R 755 /var/www/html"
-        
-        # Upload the dynamically built files
-        scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_DEV }}:/var/www/html/
-
-    # Step 6: Verify Deployment
-    - name: Verify Deployment
-      run: |
-        ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_DEV }} "ls -la /var/www/html/"
-  
-  deploy-test:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/test-FE'
-
-    steps:
-     # Step 1: Checkout Code
-     - name: Checkout Code
-       uses: actions/checkout@v4
+      # Step 1: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v4
       
-     # Step 2: Install Dependencies
-     - name: Install Dependencies
-       run: |
-         npm fund
-         npm install
-           
-     # Step 3: Build the React App
-     - name: Build React App
-       run: |
-         npm run build  # This generates the "dist" folder
-  
-     # Debug Step: Print GCP IP (Be careful with sensitive information)
-     - name: Print GCP IP Without Masking
-       run: |
-         echo "GCP VM IP Test: $(echo ${{ secrets.GCP_IP_TEST }} | sed 's/./& /g')"
+      # Step 2: Install Dependencies
+      - name: Install Dependencies
+        run: |
+          npm install
       
-     # Step 4: Set up SSH Key for GCP Deployment
-     - name: Set Up SSH
-       run: |
-         mkdir -p ~/.ssh
-         echo "${{ secrets.GCP_SSH_FILE_TEST }}" > ~/.ssh/id_rsa
-         chmod 600 ~/.ssh/id_rsa
-         ssh-keyscan -H ${{ secrets.GCP_IP_TEST }} >> ~/.ssh/known_hosts
-  
-     # Step 5: Deploy Built Files and .env to GCP VM
-     - name: Deploy Built Files and .env to GCP VM
-       run: |
-         # Ensure correct permissions on the target directory
-         ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_TEST }} "sudo chown -R ${{ secrets.GCP_USER }}:www-data /var/www/html && sudo chmod -R 755 /var/www/html"
-         
-         # Upload the dynamically built files
-         scp -r dist/* ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_TEST }}:/var/www/html/
-
-
-  
+      # Step 3: Set API URL Based on Branch
+      - name: Set API URL Based on Branch
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
+          fi
       
-     # Step 6: Verify Deployment
-     - name: Verify Deployment
-       run: |
-         ssh ${{ secrets.GCP_USER }}@${{ secrets.GCP_IP_TEST }} "ls -la /var/www/html/"
+      # Step 4: Build the React App
+      - name: Build React App
+        run: |
+          npm run build
+        env:
+          VITE_PUBLIC_API_URL: ${{ env.VITE_PUBLIC_API_URL }}
+
+      # Step 5: Print Environment Variable
+      - name: Print API URL
+        run: |
+          echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
