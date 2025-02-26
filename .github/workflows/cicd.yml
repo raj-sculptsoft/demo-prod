@@ -23,12 +23,12 @@ jobs:
       # Step 3: Debug - Print GitHub Variable Before Assigning
       - name: Debug - Print GitHub Variable
         run: |
-          echo "GitHub Variable VITE_PUBLIC_API_URL_DEV: ${{ vars.VITE_PUBLIC_API_URL_DEV }}"
+          echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
       
       # Step 4: Set API URL in Environment
       - name: Set API URL
         run: |
-          echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
+          echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
       
       # Step 5: Debug - Print API URL After Assignment
       - name: Debug - Print Assigned API URL
