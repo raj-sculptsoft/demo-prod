@@ -11,31 +11,29 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      # Step 1: Checkout Code
       - name: Checkout Code
         uses: actions/checkout@v4
-      
-      # Step 2: Install Dependencies
+
       - name: Install Dependencies
+        run: npm install
+
+      - name: Verify Secret Exists
         run: |
-          npm install
-      
-      # Step 3: Debug - Print GitHub Variable Before Assigning
-      - name: Debug - Print GitHub Variable
-        run: |
-          echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
-      
-      # Step 4: Set API URL in Environment
+          if [[ -z "${{ secrets.VITE_PUBLIC_API_URL_DEV }}" ]]; then
+            echo "❌ Secret is NOT available! Check GitHub settings."
+            exit 1
+          else
+            echo "✅ Secret is available!"
+          fi
+
       - name: Set API URL
         run: |
           echo "VITE_PUBLIC_API_URL=${{ secrets.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
-      
-      # Step 5: Debug - Print API URL After Assignment
-      - name: Debug - Print Assigned API URL
-        run: |
-          echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
 
-      # Step 6: Build the React App with Correct API URL
+      - name: Debug - Print API URL Safely
+        run: |
+          echo "VITE_PUBLIC_API_URL: $(echo $VITE_PUBLIC_API_URL | sed 's/./& /g')"
+
       - name: Build React App
         run: |
           npm run build
