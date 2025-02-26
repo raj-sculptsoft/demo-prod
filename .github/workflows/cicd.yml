@@ -26,15 +26,15 @@ jobs:
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
           fi
-      
-      # Step 4: Build the React App
+
+      # Step 4: Print API URL (Now it will be set correctly)
+      - name: Print API URL
+        run: |
+          echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
+
+      # Step 5: Build the React App
       - name: Build React App
         run: |
           npm run build
         env:
           VITE_PUBLIC_API_URL: ${{ env.VITE_PUBLIC_API_URL }}
-
-      # Step 5: Print Environment Variable
-      - name: Print API URL
-        run: |
-          echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
