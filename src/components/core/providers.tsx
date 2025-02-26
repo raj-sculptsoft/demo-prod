@@ -1,5 +1,3 @@
-"use client";
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppStore, default as makeStore } from "@/store/store";
 import React, { useRef } from "react";

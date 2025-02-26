@@ -1,4 +1,3 @@
-// LinkAssetsPage.tsx
 import CustomButton from "@/components/core/custom-button";
 import { FormMultiSelect } from "@/components/core/form-fields/multi-select";
 import { FormSelect } from "@/components/core/form-fields/select";
@@ -67,7 +66,7 @@ export default function LinkAssetsPage() {
     {
       product: string;
       product_id: string;
-      tags: { id: string; label: string; program_language: string[] | null }[];
+      tags: { id: string; label: string; program_language: string[] }[];
     }[]
   >([]);
   const [showDialog, setShowDialog] = useState(false);
@@ -107,6 +106,7 @@ export default function LinkAssetsPage() {
         targets.list.map((target) => target.semgrep_project_id),
       );
 
+      // Transform data to ensure only valid project IDs are included
       const transformedData = linkProject?.products
         .map((product) => ({
           product: product.product_name,
@@ -120,18 +120,21 @@ export default function LinkAssetsPage() {
                 ? project.program_language
                 : project.program_language
                   ? [project.program_language]
-                  : null,
+                  : [],
             })),
         }))
         .filter((product) => product.tags.length > 0);
 
       setLinkedData(transformedData);
 
+      // Store initial language selections
       const newLanguageSelections: Record<string, string[]> = {};
       transformedData.forEach((product) => {
         product.tags.forEach((tag) => {
           if (tag.program_language) {
             newLanguageSelections[tag.id] = tag.program_language;
+          } else {
+            newLanguageSelections[tag.id] = [];
           }
         });
       });
@@ -145,8 +148,8 @@ export default function LinkAssetsPage() {
 
     linkedData.forEach((item) => {
       item.tags.forEach((tag) => {
-        if (!tag.program_language) {
-          errors[tag.id] = "Programming Language is required.";
+        if (!tag.program_language || tag.program_language.length === 0) {
+          errors[tag.id] = "At least one programming language is required";
         }
       });
     });
@@ -166,7 +169,7 @@ export default function LinkAssetsPage() {
           projects: item.tags.map((tag) => ({
             project_id: tag.id,
             project_name: tag.label,
-            program_language: tag.program_language || null,
+            program_language: tag.program_language || [],
           })),
         })),
       };
@@ -246,7 +249,10 @@ export default function LinkAssetsPage() {
           {
             product: selectedProduct.product_name,
             product_id: selectedProduct.product_id,
-            tags: tagList,
+            tags: tagList.map((tag) => ({
+              ...tag,
+              program_language: tag.program_language ?? [],
+            })),
           },
           ...otherProducts,
         ];
@@ -398,6 +404,8 @@ export default function LinkAssetsPage() {
                   label="Select Project"
                   placeholder="Select Project"
                   isLoading={targetListLoading}
+                  allowCustomOptions={false}
+                  className="max-h-[230px]"
                   options={getSelectOptions(
                     unselectedTargets.map((item) => ({
                       ...item,

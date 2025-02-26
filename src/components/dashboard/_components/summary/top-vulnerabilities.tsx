@@ -28,6 +28,7 @@ export default function TopVulnerabilities() {
   const getSeverityColor = (
     impact: DashboardVulnerabilitiesDetails["impact"],
   ) => {
+    // Returns appropriate background and indicator colors based on severity level
     switch (impact) {
       case "Critical":
         return { indicator: "bg-red", indicatorBg: "bg-red-lighter" };
@@ -50,6 +51,7 @@ export default function TopVulnerabilities() {
     Low: 60,
   };
 
+  // Maps severity levels to numerical values for the progress bar representation
   const vulnerabilities = data.list.map((item) => ({
     id: String(item.id),
     vulnerability_name: item.vulnerability_name,
@@ -84,15 +86,17 @@ export default function TopVulnerabilities() {
                   {vulnerability.id}
                 </TableCell>
                 <TableCell>{vulnerability.vulnerability_name}</TableCell>
-                <TableCell className="w-[35%]">
-                  <Progress
-                    value={vulnerability.severity}
-                    className={`h-1 ${getSeverityColor(vulnerability.impact).indicatorBg}`}
-                    indicatorClassName={
-                      getSeverityColor(vulnerability.impact).indicator +
-                      " rounded-lg"
-                    }
-                  />
+                <TableCell className="w-[35%] py-4">
+                  <div className="flex items-center">
+                    <Progress
+                      value={vulnerability.severity}
+                      className={`h-[5px] ${getSeverityColor(vulnerability.impact).indicatorBg}`}
+                      indicatorClassName={
+                        getSeverityColor(vulnerability.impact).indicator +
+                        " rounded-lg"
+                      }
+                    />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <Badge

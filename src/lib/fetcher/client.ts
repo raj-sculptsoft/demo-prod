@@ -7,12 +7,15 @@ interface ClientFetcherProps extends FetcherProps {
   baseURL?: string;
   params?: Record<string, string | number>;
 }
+
+// Base API URL from environment configuration
 const URL = config.VITE_PUBLIC_API_URL + "/api/";
 
+// Create an Axios instance with default settings
 const fetcherInstance = axios.create({
   baseURL: URL,
   headers: {
-    "ngrok-skip-browser-warning": "69420",
+    "ngrok-skip-browser-warning": "69420", // Bypass ngrok browser warning
   },
 });
 
@@ -26,6 +29,7 @@ export default async function clientFetcher<IReturn>({
   params,
 }: ClientFetcherProps): Promise<IResponse<IReturn>> {
   try {
+    // Make an API request using the Axios instance
     const response: { data: IResponse<IReturn> } = await fetcherInstance({
       url: request,
       method,
@@ -40,6 +44,7 @@ export default async function clientFetcher<IReturn>({
 
     return response?.data;
   } catch (error) {
+    // Handle API errors and return a rejected Promise with a meaningful error message
     return Promise.reject(
       (error as { response: { data: IError } })?.response?.data ?? {
         message: "Something went wrong",

@@ -33,6 +33,7 @@ export default function RiskMatrix() {
   // Dynamically create likelihood levels array based on impactLevels
   const likelihoodLevels = ["Risk Matrix", "Low", "Medium", "High", "Critical"];
 
+  // Function to determine the background color of a cell based on impact and likelihood levels
   const getCellColor = (
     likelihood: string | undefined,
     impact: string | undefined,

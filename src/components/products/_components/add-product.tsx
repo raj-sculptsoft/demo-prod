@@ -15,6 +15,7 @@ import { setShowProductForm } from "../../../store/products/slice";
 export default function AddProduct() {
   const dispatch = useAppDispatch();
 
+  // Fetch multiple dropdown select options when the component mounts
   useEffect(() => {
     dispatch(
       getFormSelectOptions({

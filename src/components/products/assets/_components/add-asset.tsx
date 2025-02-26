@@ -1,5 +1,3 @@
-"use client";
-
 import CustomButton from "@/components/core/custom-button";
 import { useAppDispatch } from "@/hooks/use-store";
 import { SelectsEnum } from "@/lib/common";
@@ -10,6 +8,7 @@ import { useEffect } from "react";
 export default function AddAsset() {
   const dispatch = useAppDispatch();
 
+  // Fetches programming language options when the component mounts
   useEffect(() => {
     dispatch(
       getFormSelectOptions({

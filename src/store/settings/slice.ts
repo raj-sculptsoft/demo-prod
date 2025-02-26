@@ -53,6 +53,7 @@ const synkSlice = createSlice({
   name: "synk",
   initialState,
   reducers: {
+    // Reset State
     resetLinkProjectState: (state) => {
       state.linkProject = null;
     },
@@ -69,6 +70,7 @@ const synkSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Get Synk
     builder
       .addCase(getSynk.pending, (state) => {
         state.loading = true;
@@ -83,6 +85,7 @@ const synkSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Get Target List
     builder
       .addCase(addOrEditSynk.pending, (state) => {
         state.loading = true;
@@ -100,6 +103,7 @@ const synkSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Get Target List
     builder
       .addCase(getTargetList.pending, (state) => {
         state.targetListLoading = true;
@@ -117,6 +121,7 @@ const synkSlice = createSlice({
         state.targetListError = action.payload as string;
       });
 
+    // Add or Edit Targets
     builder
       .addCase(addOrEditTargets.pending, (state) => {
         state.loading = true;
@@ -134,6 +139,7 @@ const synkSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Get Project Link
     builder
       .addCase(getProjectLink.pending, (state) => {
         state.loading = true;
@@ -151,6 +157,7 @@ const synkSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Get Status By Id
     builder
       .addCase(fetchStatusById.pending, (state) => {
         state.loading = true;

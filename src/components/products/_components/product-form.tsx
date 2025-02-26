@@ -34,6 +34,8 @@ import { z } from "zod";
 
 export default function ProductForm() {
   const open = useAppSelector(({ products }) => products.showProductForm);
+
+  // Extract data and loading states from Redux store for form dropdowns
   const {
     loading: loadingTarget,
     data: { list: targetAudiencesList },
@@ -105,6 +107,7 @@ export default function ProductForm() {
   const editFormData = editData && Object.keys(editData).length > 0;
 
   useEffect(() => {
+    // Reset form values when editData changes (Edit mode)
     if (editFormData) {
       reset({
         product_name: editData?.product_name ?? "",
@@ -119,6 +122,7 @@ export default function ProductForm() {
         system_architech: editData?.system_architech ?? "",
       });
     } else {
+      // Reset form for new product creation
       reset({
         product_name: "",
         product_description: "",
@@ -134,6 +138,7 @@ export default function ProductForm() {
     }
   }, [editFormData, reset, editData]);
 
+  // Function to close form, reset values, and clear edit details
   const onClose = (open: boolean) => {
     reset({
       product_name: "",
@@ -152,6 +157,7 @@ export default function ProductForm() {
   };
 
   const handleDialogConfirm = () => {
+    // Navigate to assets page for the newly added product
     navigate(`/product/${productData}/assets`);
     dispatch(setShowAssetForm(true));
   };
@@ -171,6 +177,7 @@ export default function ProductForm() {
         system_architech: data.system_architech || null,
       };
 
+      // Construct payload for add or edit operation
       const payload = editData
         ? {
             ...cleanedData,
@@ -184,16 +191,19 @@ export default function ProductForm() {
       ).unwrap();
       setProductData(productData.product_id);
 
+      // Show success message for edit
       if (editData) {
         toast({ title: message });
       }
 
+      // Show confirmation dialog only for new products
       if (!editData) {
         setShowDialog(true);
       }
 
       onClose(false);
 
+      // Refresh product list or reset page based on state
       if (page === 1 || editFormData) {
         dispatch(
           getListForTable({
@@ -320,7 +330,7 @@ export default function ProductForm() {
                 <FormSelect
                   name="customer_data_type"
                   label="Does this product store or process customer data?"
-                  placeholder="Customer Data_Type "
+                  placeholder="Customer Data"
                   isLoading={loadingCustomerDataType}
                   options={getSelectOptions<StaticSelectOptions>(
                     customerDataTypeList.map((item) => ({

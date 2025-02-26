@@ -1,3 +1,4 @@
+import clientFetcher from "@/lib/fetcher/client";
 import {
   FetchStatusResponse,
   LinkAssets,
@@ -6,11 +7,9 @@ import {
   SyncPayload,
   TargetList,
 } from "@/types/settings";
-
-// API Calls (Redux Toolkit Async Thunks)
-import clientFetcher from "@/lib/fetcher/client";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// Async thunk actions for API calls
 export const addOrEditSynk = createAsyncThunk(
   "settings/addOrUpdateSynk",
   async (payload: SyncPayload, { rejectWithValue }) => {

@@ -5,6 +5,7 @@ import {
 } from "@/types/upload-report";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// Async thunk actions for API calls
 export const uploadReport = createAsyncThunk(
   "upload-report",
   async (payload: FormData, { rejectWithValue }) => {

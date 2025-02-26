@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// Schema for product form
 const FormSchema = z.object({
   product_name: z.string().min(1, "Product Name is required"),
   product_description: z.string().min(1, "Product Description is required"),

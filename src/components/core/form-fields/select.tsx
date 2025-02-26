@@ -1,5 +1,3 @@
-"use client";
-
 import {
   FormControl,
   FormField,
@@ -23,6 +21,7 @@ import { Loader2 } from "lucide-react";
 interface IFormSelectProps extends CommonFormFieldsProps {
   isLoading?: boolean;
   disabled?: boolean;
+  showErrors?: boolean;
   options: { label: string; value: string }[];
 }
 
@@ -33,6 +32,7 @@ export function FormSelect({
   options = [],
   isLoading = false,
   disabled = false,
+  showErrors = true,
   onChange = () => {},
 }: IFormSelectProps) {
   const { control } = useFormContext();
@@ -92,7 +92,7 @@ export function FormSelect({
                 </SelectContent>
               </Select>
             </FormControl>
-            <FormMessage />
+            {showErrors && <FormMessage />}
           </FormItem>
         );
       }}

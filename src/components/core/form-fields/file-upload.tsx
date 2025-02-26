@@ -1,5 +1,3 @@
-"use client";
-
 import UploadFile from "@/assets/icons/upload-file";
 import {
   FormControl,

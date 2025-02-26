@@ -8,11 +8,12 @@ import StatsCard from "../../../core/stats-card";
 export default function Stats() {
   const { data: statsData } = useAppSelector((state) => state.assets.stats);
 
+  // Maps statistics data to display different severity levels with default values
   const stats = [
     {
       title: "Critical",
       icon: <Critical className="fill-red" />,
-      value: statsData.Critical ?? 0,
+      value: statsData.Critical ?? 0, // Ensure value defaults to 0 if undefined
     },
     {
       title: "High",

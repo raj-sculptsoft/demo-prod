@@ -4,6 +4,7 @@ import { Asset } from "@/types/assets";
 import { PriorityCounts } from "@/types/common";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// Async thunk actions for API calls
 export const getAsset = createAsyncThunk(
   "assets/getAsset",
   async (id: string, { rejectWithValue }) => {

@@ -35,6 +35,8 @@ export default function Summary({ company_id }: SummaryProps) {
     ({ dashboard }) => dashboard.topVulnerability.loading,
   );
 
+  // Each useEffect is responsible for fetching a specific type of dashboard data
+  // separately to ensure independent re-fetching when dependencies change.
   useEffect(() => {
     dispatch(
       getDashboardRiskMatrix({

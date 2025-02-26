@@ -14,12 +14,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Loader2, X } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
 import * as React from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -34,8 +35,11 @@ interface FormMultiSelectProps {
   placeholder: string;
   isLoading?: boolean;
   options: Option[];
+  className?: string;
+  allowCustomOptions?: boolean;
   onChange?: (newValue: string[]) => void;
   onDropdownOpenChange?: (isOpen: boolean) => void;
+  onCustomOptionAdd?: (value: string) => Promise<Option | void>;
 }
 
 export function FormMultiSelect({
@@ -44,16 +48,28 @@ export function FormMultiSelect({
   placeholder,
   options = [],
   isLoading = false,
+  className,
+  allowCustomOptions = true,
   onChange = () => {},
   onDropdownOpenChange,
+  onCustomOptionAdd,
 }: FormMultiSelectProps) {
   const { control } = useFormContext();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [showCustomInput, setShowCustomInput] = React.useState(false);
+  const [customValue, setCustomValue] = React.useState("");
   const buttonRef = React.useRef<HTMLButtonElement | null>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   React.useEffect(() => {
     onDropdownOpenChange?.(isOpen);
   }, [isOpen, onDropdownOpenChange]);
+
+  React.useEffect(() => {
+    if (showCustomInput && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [showCustomInput]);
 
   return (
     <FormField
@@ -61,7 +77,6 @@ export function FormMultiSelect({
       name={name}
       render={({ field }) => {
         const { value = [], onChange: fieldOnChange } = field;
-
         const safeValue = Array.isArray(value) ? value : [];
 
         const handleValueChange = (
@@ -81,6 +96,23 @@ export function FormMultiSelect({
         const removeTag = (optionValue: string) => {
           handleValueChange(optionValue);
           setIsOpen(false);
+        };
+
+        const handleCustomSubmit = async (e: React.FormEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (customValue.trim()) {
+            const newOption = await onCustomOptionAdd?.(customValue.trim());
+
+            if (newOption) {
+              fieldOnChange([...safeValue, newOption.value]); // Add new UUID to selection
+              onChange([...safeValue, newOption.value]);
+            }
+
+            setCustomValue("");
+            setShowCustomInput(false);
+          }
         };
 
         return (
@@ -121,7 +153,7 @@ export function FormMultiSelect({
                         : "auto",
                     }}
                   >
-                    <Command className="max-h-[230px]">
+                    <Command className={className ?? "max-h-[125px]"}>
                       <CommandList>
                         <CommandEmpty>No options found.</CommandEmpty>
                         <CommandGroup>
@@ -133,10 +165,16 @@ export function FormMultiSelect({
                               <CommandItem
                                 key={optionValue}
                                 onSelect={() => handleValueChange(optionValue)}
-                                className={`flex h-12 items-center font-normal hover:bg-slate-100 ${index < options.length - 1 ? "border-b" : ""} ${safeValue.includes(optionValue) ? "font-medium" : ""}`}
+                                className={`flex h-12 items-center font-normal hover:bg-slate-100 ${
+                                  index < options.length - 1 ? "border-b" : ""
+                                } ${safeValue.includes(optionValue) ? "font-medium" : ""}`}
                               >
                                 <div
-                                  className={`mr-2 flex h-4 w-4 items-center justify-center rounded border ${safeValue.includes(optionValue) ? "border-primary bg-primary" : "border-gray-400"}`}
+                                  className={`mr-2 flex h-4 w-4 items-center justify-center rounded border ${
+                                    safeValue.includes(optionValue)
+                                      ? "border-primary bg-primary"
+                                      : "border-gray-400"
+                                  }`}
                                 >
                                   {safeValue.includes(optionValue) && (
                                     <Check className="h-5 w-8 text-white" />
@@ -145,6 +183,44 @@ export function FormMultiSelect({
                                 {optionLabel}
                               </CommandItem>
                             ),
+                          )}
+
+                          {/* Custom Input Option */}
+                          {allowCustomOptions && (
+                            <CommandItem
+                              onSelect={() => setShowCustomInput(true)}
+                              className="flex h-12 items-center border-t font-normal hover:bg-slate-100"
+                            >
+                              {showCustomInput ? (
+                                <form
+                                  onSubmit={handleCustomSubmit}
+                                  className="flex w-full items-center gap-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Input
+                                    ref={inputRef}
+                                    value={customValue}
+                                    onChange={(e) =>
+                                      setCustomValue(e.target.value)
+                                    }
+                                    placeholder="Add Language"
+                                    className="h-8 flex-1"
+                                  />
+                                  <Button
+                                    type="submit"
+                                    size="sm"
+                                    className="h-8 px-2"
+                                  >
+                                    Add
+                                  </Button>
+                                </form>
+                              ) : (
+                                <>
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Add Other Language
+                                </>
+                              )}
+                            </CommandItem>
                           )}
                         </CommandGroup>
                       </CommandList>

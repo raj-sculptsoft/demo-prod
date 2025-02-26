@@ -21,13 +21,13 @@ export default function AssetVulnerabilitiesPage({
 
   useEffect(() => {
     if (assetId) {
-      dispatch(getVulnerabilityStats(assetId));
+      dispatch(getVulnerabilityStats(assetId)); // Fetch vulnerability stats when assetId changes
     }
   }, [assetId, dispatch]);
 
   useEffect(() => {
     return () => {
-      dispatch(resetCurrentAsset());
+      dispatch(resetCurrentAsset()); // Cleanup: Reset current asset data when component unmounts
     };
   }, [dispatch]);
 

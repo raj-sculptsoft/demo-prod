@@ -17,14 +17,14 @@ export default function AssetsFromProduct() {
 
   useEffect(() => {
     if (productId) {
-      dispatch(getAssetStats(productId));
+      dispatch(getAssetStats(productId)); // Fetch asset statistics when productId changes
     }
   }, [productId, dispatch]);
 
   useEffect(() => {
     return () => {
-      dispatch(resetStats());
-      dispatch(resetCurrentProduct());
+      dispatch(resetStats()); // Cleanup: Reset asset stats when component unmounts
+      dispatch(resetCurrentProduct()); // Cleanup: Reset current product state on unmount
     };
   }, [dispatch]);
 

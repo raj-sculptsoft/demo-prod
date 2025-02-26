@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/sheet";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { toast } from "@/hooks/use-toast";
-import { getSelectOptions } from "@/lib/common";
+import { getSelectOptions, SelectsEnum } from "@/lib/common";
 import { IError } from "@/lib/fetcher/types";
 import FormSchema from "@/schemas/assets";
 import { addOrEditAsset } from "@/store/assets/api";
 import { clearEditDetails, setShowAssetForm } from "@/store/assets/slice";
-import { getListForTable } from "@/store/common/api";
+import {
+  addFormSelectOptions,
+  getFormSelectOptions,
+  getListForTable,
+} from "@/store/common/api";
 import { setPage } from "@/store/common/slice";
 import { Asset } from "@/types/assets";
 import { StaticSelectOptions } from "@/types/common";
@@ -59,6 +63,7 @@ export default function AssetForm() {
   const { reset } = form;
   const editFormData = editData && Object.keys(editData).length > 0;
 
+  // Populate the form with existing asset details if editing, otherwise reset the form
   useEffect(() => {
     if (editFormData) {
       reset({
@@ -76,6 +81,7 @@ export default function AssetForm() {
     }
   }, [editFormData, reset, editData]);
 
+  // Resets the form and clears edit state when the asset form is closed
   const onClose = (open: boolean) => {
     reset({
       asset_name: "",
@@ -122,6 +128,44 @@ export default function AssetForm() {
     }
   }
 
+  // Handles adding a custom programming language, ensuring it is unique before updating the dropdown list
+  const handleCustomOptionAdd = async (value: string) => {
+    try {
+      const formattedValue =
+        value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      const response = await dispatch(
+        addFormSelectOptions({
+          master_enum_uuid: null,
+          master_enum_type_id: 2,
+          master_enum_name: formattedValue,
+        }),
+      ).unwrap();
+
+      const newUUID = response?.data?.master_enum_uuid; // Extract UUID
+
+      if (newUUID) {
+        // Refresh the dropdown list with new options
+        dispatch(
+          getFormSelectOptions({
+            request: `Enum/${SelectsEnum["Programming_Language"]}`,
+          }),
+        );
+
+        return { value: newUUID, label: formattedValue }; // Return the new language object
+      }
+    } catch {
+      toast({
+        title: "This language is already added. Please add a new language.",
+        variant: "destructive",
+      });
+
+      return undefined; // Explicitly return undefined
+    }
+
+    return undefined; // Ensure the function always returns a value
+  };
+
   return (
     <Sheet
       open={open}
@@ -162,6 +206,8 @@ export default function AssetForm() {
                     "master_enum_name",
                     "master_enum_uuid",
                   )}
+                  className="max-h-[230px]"
+                  onCustomOptionAdd={handleCustomOptionAdd}
                 />
               </form>
             </Form>

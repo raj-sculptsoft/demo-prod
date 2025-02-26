@@ -43,10 +43,12 @@ export default function SynkPage() {
   const apiKey = watch("apiKey");
   const syncPeriod = watch("syncPeriod");
 
+  // Fetches Synk integration details when the component mounts or when company_id changes.
   useEffect(() => {
     dispatch(getSynk(company_id));
   }, [dispatch, company_id]);
 
+  // Updates the form fields with existing integration data when `data` is available.
   useEffect(() => {
     if (data) {
       setValue(
@@ -64,9 +66,11 @@ export default function SynkPage() {
     }
   }, [data, setValue]);
 
+  // Handles form submission, sending data to API and navigating upon success.
   const onSubmit = async (formData: FormData) => {
     setLoading(true);
 
+    // Constructs the payload with user-provided values before dispatching API call.
     const payload = {
       company_id,
       third_party_integrations_id: data?.third_party_integrations_id ?? null,
@@ -109,6 +113,7 @@ export default function SynkPage() {
     }
   };
 
+  // Checks if the form data has changed from the initial state to enable the "Save" button.
   const isFormChanged =
     initialData &&
     (orgId !== initialData.orgId ||
@@ -181,6 +186,7 @@ export default function SynkPage() {
                       name="syncPeriod"
                       label="Select Frequency"
                       placeholder="Select Frequency"
+                      showErrors={false}
                       options={[
                         { label: "4 Hours", value: "1" },
                         { label: "12 Hours", value: "2" },
@@ -189,6 +195,11 @@ export default function SynkPage() {
                         { label: "7 Days", value: "5" },
                       ]}
                     />
+                    {errors.syncPeriod && (
+                      <p className="text-sm font-medium text-red-500">
+                        Frequency selection is required.
+                      </p>
+                    )}
                   </div>
 
                   <CustomButton

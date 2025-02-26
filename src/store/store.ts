@@ -1,4 +1,3 @@
-// store.ts
 import assetsReducer from "@/store/assets/slice";
 import authReducer from "@/store/auth/slice";
 import commonReducer from "@/store/common/slice";
@@ -23,7 +22,7 @@ const makeStore = () =>
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
-        serializableCheck: false,
+        serializableCheck: false, // Disables serializability check to allow non-serializable data (e.g., Promises, Date objects) in the store
       }),
   });
 

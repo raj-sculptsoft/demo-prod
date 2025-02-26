@@ -6,11 +6,12 @@ import Sidebar from "./components/layout/sidebar.tsx";
 import { Toaster } from "./components/ui/toaster.tsx";
 import "./index.css";
 
+// Renders the app inside the root element
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
   <BrowserRouter>
     <Providers>
-      <Toaster />
+      <Toaster /> {/* Displays toast notifications */}
       <Sidebar />
       <main className="w-full px-3">
         <App />

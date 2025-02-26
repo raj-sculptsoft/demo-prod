@@ -9,6 +9,7 @@ import {
 } from "@/types/vulnerability";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// Async thunk actions for API calls
 export const getVulnerability = createAsyncThunk(
   "vulnerability/getOne",
   async (id: string, { rejectWithValue }) => {

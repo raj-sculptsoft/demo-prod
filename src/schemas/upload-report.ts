@@ -8,6 +8,7 @@ const validMimeTypes = [
   "application/json",
 ];
 
+// Schema for upload report form
 const FormSchema = z.object({
   product_id: z.string().min(1, "Product is required"),
   asset_id: z.string().min(1, "Asset is required"),

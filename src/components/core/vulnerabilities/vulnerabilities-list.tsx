@@ -8,13 +8,24 @@ import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { VULNERABILITY_DETAILS_SOURCE } from "@/lib/common";
 import { getFormattedDate } from "@/lib/date";
 import { getListForTable } from "@/store/common/api";
-import { resetTableData, setPage, setSorting } from "@/store/common/slice";
+import {
+  resetTableData,
+  setPage,
+  setRowsPerPage,
+  setSorting,
+} from "@/store/common/slice";
 import { resetStatusReportState } from "@/store/settings/slice";
 import { resetReportStatusState } from "@/store/upload-reports/slice";
 import { Asset } from "@/types/assets";
 import { Product } from "@/types/products";
 import { Vulnerability } from "@/types/vulnerability";
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomTooltip from "../tooltip";
 
@@ -33,6 +44,8 @@ export default function VulnerabilitiesList({
   const positivity_filter = searchParams.get("type") ?? "False";
   const productId = searchParams.get("product");
   const queryAssetId = searchParams.get("asset");
+  const pageFromUrl = Number(searchParams.get("page")) || 1;
+  const rowsPerPageFromUrl = Number(searchParams.get("rowsPerPage")) || 5;
 
   const assetId = paramAssetId ?? queryAssetId ?? null;
 
@@ -44,6 +57,7 @@ export default function VulnerabilitiesList({
   } = useAppSelector(({ common }) => common.dataTable);
   const { column, direction } = sorting;
 
+  // Dynamically filter columns based on positivity_filter
   const columns = React.useMemo(() => {
     const baseColumns = [
       { key: "id", label: "ID" },
@@ -63,9 +77,26 @@ export default function VulnerabilitiesList({
       : baseColumns;
   }, [positivity_filter]);
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
-    dispatch(setPage(1));
-  }, [search, dispatch, positivity_filter, assetId, productId]);
+    if (isFirstRender.current) {
+      isFirstRender.current = false; // Skip first render
+      return;
+    }
+
+    dispatch(setPage(1)); // Reset page in Redux store
+
+    const params = new URLSearchParams(location.search);
+    params.set("page", "1");
+    navigate({ search: params.toString() }, { replace: true });
+  }, [search, positivity_filter, assetId, productId, dispatch, navigate]);
+
+  // Sync Redux store with URL pagination parameters
+  useEffect(() => {
+    dispatch(setPage(pageFromUrl));
+    dispatch(setRowsPerPage(rowsPerPageFromUrl));
+  }, [pageFromUrl, rowsPerPageFromUrl, dispatch]);
 
   const { data: reportData } = useAppSelector(
     (state) => state.uploadReport.reportStatus,
@@ -107,6 +138,7 @@ export default function VulnerabilitiesList({
       );
     };
 
+    // If a report is still processing, keep fetching data every 15 seconds
     if (reportData.status === "In Progress") {
       setFirstLoading(false);
       const interval = setInterval(fetchListForTable, 15000);
@@ -140,12 +172,14 @@ export default function VulnerabilitiesList({
     productId,
   ]);
 
+  // Cleanup table data when component unmounts
   useEffect(() => {
     return () => {
       dispatch(resetTableData());
     };
   }, [dispatch]);
 
+  // Scroll to top when data changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [list]);

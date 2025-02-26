@@ -23,5 +23,4 @@ const FormSchemaAPI = z.object({
     .nonempty("At least one project is required"),
 });
 
-// Export both schemas
 export { FormSchemaAPI, FormSchemaOrg };

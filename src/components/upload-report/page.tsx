@@ -1,5 +1,3 @@
-"use client";
-
 import CustomButton from "@/components/core/custom-button";
 import FormFileUpload from "@/components/core/form-fields/file-upload";
 import { FormSelect } from "@/components/core/form-fields/select";
@@ -21,6 +19,7 @@ import {
 import { IError } from "@/lib/fetcher/types";
 import FormSchema from "@/schemas/upload-report";
 import { getAllProducts, getAssetsByProduct } from "@/store/common/api";
+import { clearAsset } from "@/store/common/slice";
 import { fetchReportById, uploadReport } from "@/store/upload-reports/api";
 import { setReportId } from "@/store/upload-reports/slice";
 import { Asset } from "@/types/assets";
@@ -57,16 +56,19 @@ export default function UploadReport() {
   );
 
   useEffect(() => {
+    // Fetch the list of products when the component mounts
     dispatch(
       getAllProducts({
         company_id: config.COMPANY_ID,
         ...defaultPayloadForWithoutPagination,
       }),
     );
+    dispatch(clearAsset()); // Clear previously selected assets when fetching new products
   }, [dispatch]);
 
   function onProductChange(product_id: string) {
-    resetField("asset_id");
+    resetField("asset_id"); // Reset the asset selection when a new product is chosen
+    dispatch(clearAsset()); // Clear asset list when changing the product
     dispatch(
       getAssetsByProduct({
         product_id,
@@ -75,12 +77,12 @@ export default function UploadReport() {
     );
   }
 
-  // Sort lists using useMemo to avoid unnecessary re-sorting
+  // Sort lists using useMemo to avoid unnecessary re-sorting on every render
   const sortedProductsList = useMemo(() => {
     if (!productsList?.length) return [];
     return [...productsList].sort(
       (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(), // Sort products by latest created date
     );
   }, [productsList]);
 
@@ -88,7 +90,7 @@ export default function UploadReport() {
     if (!assetsList?.length) return [];
     return [...assetsList].sort(
       (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(), // Sort assets by latest created date
     );
   }, [assetsList]);
 
@@ -99,13 +101,12 @@ export default function UploadReport() {
     }
     try {
       const { data } = await dispatch(uploadReport(formData)).unwrap();
-      // toast({ title: message });
-      dispatch(setReportId(data.report_id));
-      await dispatch(fetchReportById(data.report_id));
+      dispatch(setReportId(data.report_id)); // Store report ID for later reference
+      await dispatch(fetchReportById(data.report_id)); // Fetch the report details after uploading
       navigate(
-        `/vulnerabilities?product=${data.product_id}&asset=${data.asset_id}`,
+        `/vulnerabilities?product=${data.product_id}&asset=${data.asset_id}`, // Redirect to vulnerabilities page with selected product & asset
       );
-      reset();
+      reset(); // Reset the form after successful submission
     } catch (error) {
       toast({
         title: (error as IError)?.message ?? "Something went wrong",

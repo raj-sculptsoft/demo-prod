@@ -157,6 +157,7 @@ export const commonSlice = createSlice({
   name: "commonSlice",
   initialState,
   reducers: {
+    // Reset State
     resetCommonState: () => {
       return initialState;
     },
@@ -186,6 +187,7 @@ export const commonSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Get All Products
     builder
       .addCase(getAllProducts.pending, (state) => {
         state.products.loading = true;
@@ -197,8 +199,10 @@ export const commonSlice = createSlice({
       .addCase(getAllProducts.rejected, (state, { error }) => {
         state.products.loading = false;
         state.products.error = error.message as string;
-      })
+      });
 
+    // Get Assets By Product
+    builder
       .addCase(getAssetsByProduct.pending, (state) => {
         state.assets.loading = true;
       })
@@ -209,8 +213,10 @@ export const commonSlice = createSlice({
       .addCase(getAssetsByProduct.rejected, (state, { error }) => {
         state.assets.loading = false;
         state.assets.error = error.message as string;
-      })
+      });
 
+    // Get List For Table
+    builder
       .addCase(getListForTable.pending, (state) => {
         state.dataTable.isLoading = true;
       })
@@ -230,8 +236,10 @@ export const commonSlice = createSlice({
         state.dataTable.isLoading = false;
         state.dataTable.data = DefaultsDataTable.data;
         state.dataTable.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Options
+    builder
       .addCase(getFormSelectOptions.pending, (state) => {
         state.formSelectOptions.loading = true;
       })
@@ -242,8 +250,10 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectOptions.rejected, (state, { error }) => {
         state.formSelectOptions.loading = false;
         state.formSelectOptions.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Product Options
+    builder
       .addCase(getFormSelectProductOptions.pending, (state) => {
         state.formSelectProductOptions.loading = true;
       })
@@ -254,8 +264,10 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectProductOptions.rejected, (state, { error }) => {
         state.formSelectProductOptions.loading = false;
         state.formSelectProductOptions.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Revenue Options
+    builder
       .addCase(getFormSelectRevenueOptions.pending, (state) => {
         state.formSelectRevenueOptions.loading = true;
       })
@@ -266,8 +278,10 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectRevenueOptions.rejected, (state, { error }) => {
         state.formSelectRevenueOptions.loading = false;
         state.formSelectRevenueOptions.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Customer Options
+    builder
       .addCase(getFormSelectCustomerOptions.pending, (state) => {
         state.formSelectCustomerOptions.loading = true;
       })
@@ -278,8 +292,10 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectCustomerOptions.rejected, (state, { error }) => {
         state.formSelectCustomerOptions.loading = false;
         state.formSelectCustomerOptions.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Compliance Options
+    builder
       .addCase(getFormSelectComplianceOptions.pending, (state) => {
         state.formSelectComplianceOptions.loading = true;
       })
@@ -293,8 +309,10 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectComplianceOptions.rejected, (state, { error }) => {
         state.formSelectComplianceOptions.loading = false;
         state.formSelectComplianceOptions.error = error.message as string;
-      })
+      });
 
+    // Get Form Select Dependency Options
+    builder
       .addCase(getFormSelectDependencyOptions.pending, (state) => {
         state.formSelectDependencyOptions.loading = true;
       })
@@ -308,14 +326,17 @@ export const commonSlice = createSlice({
       .addCase(getFormSelectDependencyOptions.rejected, (state, { error }) => {
         state.formSelectDependencyOptions.loading = false;
         state.formSelectDependencyOptions.error = error.message as string;
-      })
-
-      .addCase(deleteProduct.rejected, (state, { error }) => {
-        state.dataTable.error = error.message as string;
-      })
-      .addCase(deleteAsset.rejected, (state, { error }) => {
-        state.dataTable.error = error.message as string;
       });
+
+    // Delete Product
+    builder.addCase(deleteProduct.rejected, (state, { error }) => {
+      state.dataTable.error = error.message as string;
+    });
+
+    // Delete Asset
+    builder.addCase(deleteAsset.rejected, (state, { error }) => {
+      state.dataTable.error = error.message as string;
+    });
   },
 });
 

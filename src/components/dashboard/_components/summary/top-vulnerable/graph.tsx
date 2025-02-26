@@ -40,20 +40,7 @@ interface GraphProps {
   data: DashboardTopVulnerabilityList;
 }
 
-// const defaultNodeData = [
-//   { x: 290, y: 180, color: "#FD5454" },
-//   { x: 505, y: 300, color: "#5E77FF" },
-//   { x: 80, y: 100, color: "#D04D6C" },
-//   { x: 75, y: 300, color: "#69E9A8" },
-//   { x: 530, y: 100, color: "#FEC53D" },
-// ] as const;
-
-const Graph: React.FC<GraphProps> = ({
-  hasChildTooltip = true,
-  // width = 600,
-  // height = 400,
-  data,
-}) => {
+const Graph: React.FC<GraphProps> = ({ hasChildTooltip = true, data }) => {
   const dispatch = useAppDispatch();
   const company_id = config.COMPANY_ID;
   const [savedProductId, setSavedProductId] = useState<string | null>(null);
@@ -84,7 +71,7 @@ const Graph: React.FC<GraphProps> = ({
           {
             x: dimensions.width * 0.42,
             y: dimensions.height * 0.5,
-            color: "#FD5454",
+            color: "#05004E",
           },
         ];
       case 2:
@@ -92,12 +79,12 @@ const Graph: React.FC<GraphProps> = ({
           {
             x: dimensions.width * 0.25,
             y: dimensions.height * 0.5,
-            color: "#FD5454",
+            color: "#05004E",
           },
           {
             x: dimensions.width * 0.62,
             y: dimensions.height * 0.5,
-            color: "#5E77FF",
+            color: "#FF6669",
           },
         ];
       case 3:
@@ -105,17 +92,17 @@ const Graph: React.FC<GraphProps> = ({
           {
             x: dimensions.width * 0.2,
             y: dimensions.height * 0.25,
-            color: "#FD5454",
+            color: "#05004E",
           },
           {
             x: dimensions.width * 0.65,
             y: dimensions.height * 0.25,
-            color: "#5E77FF",
+            color: "#FF6669",
           },
           {
             x: dimensions.width * 0.42,
             y: dimensions.height * 0.75,
-            color: "#D04D6C",
+            color: "#7E54FD",
           },
         ];
       case 4:
@@ -123,22 +110,22 @@ const Graph: React.FC<GraphProps> = ({
           {
             x: dimensions.width * 0.2,
             y: dimensions.height * 0.22,
-            color: "#FD5454",
+            color: "#05004E",
           },
           {
             x: dimensions.width * 0.65,
             y: dimensions.height * 0.22,
-            color: "#5E77FF",
+            color: "#FF6669",
           },
           {
             x: dimensions.width * 0.2,
             y: dimensions.height * 0.75,
-            color: "#69E9A8",
+            color: "#197941",
           },
           {
             x: dimensions.width * 0.65,
             y: dimensions.height * 0.75,
-            color: "#FEC53D",
+            color: "#5E77FF",
           },
         ];
       default:
@@ -146,27 +133,27 @@ const Graph: React.FC<GraphProps> = ({
           {
             x: dimensions.width * 0.14,
             y: dimensions.height * 0.22,
-            color: "#FD5454",
+            color: "#05004E",
           },
           {
             x: dimensions.width * 0.7,
             y: dimensions.height * 0.22,
-            color: "#5E77FF",
+            color: "#FF6669",
           },
           {
             x: dimensions.width * 0.42,
             y: dimensions.height * 0.5,
-            color: "#D04D6C",
+            color: "#7E54FD",
           },
           {
             x: dimensions.width * 0.14,
             y: dimensions.height * 0.75,
-            color: "#69E9A8",
+            color: "#197941",
           },
           {
             x: dimensions.width * 0.7,
             y: dimensions.height * 0.75,
-            color: "#FEC53D",
+            color: "#5E77FF",
           },
         ];
     }
@@ -345,7 +332,6 @@ const Graph: React.FC<GraphProps> = ({
     width: number,
     height: number,
     stageWidth: number,
-    // stageHeight: number,
     offset = 10,
   ) => {
     const padding = 10;
@@ -509,20 +495,15 @@ const Graph: React.FC<GraphProps> = ({
                           y={child.y}
                           radius={child.size}
                           fill={child.color}
-                          // fill="#E5D9F8"
                           onMouseEnter={(e) => {
                             const stage = e.target.getStage();
                             if (!stage) return;
-                            // const stageWidth = stage.width();
-                            // const stageHeight = stage.height();
                             const { x, y } = calculateTooltipPosition(
                               child.x,
                               child.y,
                               180,
                               100,
                               600,
-                              // stageWidth,
-                              // stageHeight,
                               10,
                             );
 

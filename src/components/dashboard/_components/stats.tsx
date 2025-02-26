@@ -32,6 +32,10 @@ export default function Stats({ company_id }: StatsProps) {
   }, [company_id, product_id, asset_id, dispatch]);
 
   let firstStat;
+  // Determine the first statistic based on whether a product or asset is selected.
+  // - If a product is selected without an asset, show "Total Assets".
+  // - If an asset is selected, show "Total Files".
+  // - Otherwise, show "Total Products".
   if (product_id && !asset_id) {
     firstStat = {
       title: "Total Assets",

@@ -24,6 +24,7 @@ export default function TagList({
   const [languageMap, setLanguageMap] = useState<Record<string, string>>({});
   const dispatch = useAppDispatch();
 
+  // Fetch programming languages when the component mounts
   useEffect(() => {
     dispatch(
       getFormSelectOptions({
@@ -33,6 +34,7 @@ export default function TagList({
   }, [dispatch]);
 
   useEffect(() => {
+    // Convert the programming languages list into a dictionary for quick lookups
     const map = programmingLanguagesList.reduce<Record<string, string>>(
       (acc, lang) => {
         if (lang?.master_enum_uuid) {

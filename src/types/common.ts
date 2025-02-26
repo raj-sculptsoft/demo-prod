@@ -51,3 +51,16 @@ export interface PriorityCounts {
   Medium: number;
   Low: number;
 }
+
+export interface AddUpdateEnum {
+  master_enum_uuid: string;
+  master_enum_type_id: number;
+  master_enum_name: string;
+  master_enum_id: number;
+  created_by: null;
+  updated_by: null;
+  created_at: string;
+  updated_at: string;
+  is_active: boolean;
+  is_archived: boolean;
+}

@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { setPage, setRowsPerPage } from "@/store/common/slice";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
 interface IDataTableProps {
   headers: React.ReactNode;
@@ -47,9 +46,25 @@ export default function DataTable({
   } = useAppSelector(({ common }) => common.dataTable);
 
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
-  // const displayPage = totalPages ? (currentPage - 1) * rowsPerPage + 1 : 0;
   const displayPage = total_count > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0;
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(location.search);
+    params.set("page", newPage.toString());
+    navigate({ search: params.toString() }, { replace: true });
+    dispatch(setPage(newPage));
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    const params = new URLSearchParams(location.search);
+    params.set("rowsPerPage", newRowsPerPage.toString());
+    params.set("page", "1"); // Reset to page 1 when changing rows per page
+    navigate({ search: params.toString() }, { replace: true });
+    dispatch(setRowsPerPage(newRowsPerPage));
+    dispatch(setPage(1));
+  };
 
   return (
     <>
@@ -75,10 +90,7 @@ export default function DataTable({
           <span className="text-sm font-semibold">Rows per page:</span>
           <Select
             value={rowsPerPage.toString()}
-            onValueChange={(value) => {
-              dispatch(setRowsPerPage(+value));
-              dispatch(setPage(1));
-            }}
+            onValueChange={(value) => handleRowsPerPageChange(Number(value))}
           >
             <SelectTrigger className="w-16">
               <SelectValue placeholder="5" />
@@ -103,7 +115,7 @@ export default function DataTable({
           <Button
             variant="outline"
             size="icon"
-            onClick={() => dispatch(setPage(Math.max(currentPage - 1, 1)))}
+            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
             disabled={currentPage === 1 || isLoading}
             className="h-9 w-9"
           >
@@ -116,7 +128,7 @@ export default function DataTable({
             variant="outline"
             size="icon"
             onClick={() =>
-              dispatch(setPage(Math.min(currentPage + 1, totalPages)))
+              handlePageChange(Math.min(currentPage + 1, totalPages))
             }
             disabled={
               currentPage === totalPages || isLoading || total_count === 0

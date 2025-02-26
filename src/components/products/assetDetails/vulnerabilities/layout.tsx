@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { getAsset } from "@/store/assets/api";
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import FilterIcon from "../../../core/filter/filter-icon";
 import FilterSearch from "../../../core/filter/filter-search";
@@ -19,7 +19,7 @@ export default function Layout({ children, params }: Props) {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
-  const hasFiltersApplied = queryParams.get("type") === "True";
+  const hasFiltersApplied = queryParams.get("type") === "True"; // Check if filters are applied based on query params
 
   const dispatch = useAppDispatch();
   const { data: assetData } = useAppSelector(
@@ -28,9 +28,9 @@ export default function Layout({ children, params }: Props) {
 
   const { assetId, productId } = params;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (assetId) {
-      dispatch(getAsset(assetId));
+      dispatch(getAsset(assetId)); // Fetch asset details when assetId changes
     }
   }, [assetId, dispatch]);
 

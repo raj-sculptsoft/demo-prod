@@ -90,6 +90,7 @@ export const productsSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
+    // Reset State
     resetList: (state) => {
       state.list = initialState.list;
     },
@@ -181,6 +182,7 @@ export const productsSlice = createSlice({
         state.addOrEditProduct.error = error.message as string;
       });
 
+    // Delete Product
     builder
       .addCase(deleteProduct.pending, (state) => {
         state.deleteDialog.loading = true;

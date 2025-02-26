@@ -45,6 +45,7 @@ export default function VulnerabilitiesPage() {
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
+    // Handle different report statuses and show corresponding toasts
     const handleReportStatus = (status: string) => {
       if (status === "Done") {
         toast({
@@ -77,7 +78,8 @@ export default function VulnerabilitiesPage() {
           toast({
             title: message,
           });
-        } else {
+        }
+        if (reportData) {
           toast({
             title:
               "The analysis is partially complete. The review identified vulnerabilities; some data is incomplete.",
@@ -94,6 +96,7 @@ export default function VulnerabilitiesPage() {
       }
     };
 
+    // Reset the report and status states on the first load
     if (initialLoad && (company_id || product_id || asset_id)) {
       setFirstLoading(true);
       dispatch(resetReportStatusState());
@@ -105,6 +108,7 @@ export default function VulnerabilitiesPage() {
       setInitialLoad(true);
     }
 
+    // Fetch dashboard statistics and report details
     const fetchStats = () => {
       if (company_id || (product_id && asset_id)) {
         dispatch(
@@ -125,6 +129,7 @@ export default function VulnerabilitiesPage() {
     };
 
     if (company_id || (product_id && asset_id)) {
+      // Handle status updates immediately if they are completed
       if (
         reportData.status === "Done" ||
         reportData.status === "Fail" ||
@@ -145,6 +150,7 @@ export default function VulnerabilitiesPage() {
 
       fetchStats();
 
+      // Poll for updates every 15 seconds if report/status is still "In Progress"
       if (reportData.status === "In Progress") {
         setFirstLoading(false);
         interval = setInterval(fetchStats, 15000);
@@ -157,7 +163,7 @@ export default function VulnerabilitiesPage() {
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) clearInterval(interval); // Cleanup interval on component unmount
     };
   }, [
     asset_id,

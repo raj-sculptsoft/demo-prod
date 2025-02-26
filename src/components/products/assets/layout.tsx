@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { getProduct } from "@/store/products/api";
-import React from "react";
+import React, { useEffect } from "react";
 import FilterSearch from "../../core/filter/filter-search";
 import Filters from "../../core/filter/filters";
 import Header from "../../layout/header";
@@ -19,9 +19,9 @@ export default function Layout({
 
   const { data } = useAppSelector(({ products }) => products.currentProduct);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (productId) {
-      dispatch(getProduct(productId));
+      dispatch(getProduct(productId)); // Fetch product details when productId changes
     }
   }, [productId]);
 

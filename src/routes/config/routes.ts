@@ -50,8 +50,6 @@ const ROUTES = {
   },
   SETTINGS: {
     INDEX: "/settings",
-    // SYNK_DETAILS: "/settings/synk",
-    // LINK_ASSETS: "/settings/synk/linkAssets",
     SEMGREP_DETAILS: "/settings/semgrep",
     LINK_ASSETS: "/settings/semgrep/linkAssets",
   },

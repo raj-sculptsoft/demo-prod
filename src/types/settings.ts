@@ -1,5 +1,3 @@
-// Types for the Settings and TargetList
-
 export interface Settings {
   company_id: string;
   third_party_integrations_id: string;
@@ -50,12 +48,6 @@ export interface TargetList {
 export interface TargetData {
   list: List[];
 }
-
-// export interface List {
-//   snyk_target_id: string;
-//   snyk_target_name: string;
-// }
-
 export interface List {
   semgrep_project_id: string;
   semgrep_project_name: string;

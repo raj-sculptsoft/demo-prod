@@ -7,8 +7,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
+import { toast } from "@/hooks/use-toast";
 import { getSelectOptions, SelectsEnum } from "@/lib/common";
-import { getFormSelectOptions } from "@/store/common/api";
+import { addFormSelectOptions, getFormSelectOptions } from "@/store/common/api";
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
@@ -47,6 +48,7 @@ export default function LanguageSelectionDialog({
 
   const dispatch = useAppDispatch();
 
+  // Fetch language options only when the dialog opens
   useEffect(() => {
     if (open) {
       dispatch(
@@ -57,6 +59,7 @@ export default function LanguageSelectionDialog({
     }
   }, [dispatch, open]);
 
+  // Reset selected languages when project changes
   useEffect(() => {
     methods.reset({
       program_language: selectedProject.selected_languages || [],
@@ -67,6 +70,44 @@ export default function LanguageSelectionDialog({
     loading,
     data: { list: programmingLanguagesList = [] },
   } = useAppSelector(({ common }) => common.formSelectOptions);
+
+  const handleCustomOptionAdd = async (value: string) => {
+    try {
+      // Capitalize first letter
+      const formattedValue =
+        value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+
+      const response = await dispatch(
+        addFormSelectOptions({
+          master_enum_uuid: null,
+          master_enum_type_id: 2,
+          master_enum_name: formattedValue,
+        }),
+      ).unwrap();
+
+      const newUUID = response?.data?.master_enum_uuid; // Extract UUID
+
+      if (newUUID) {
+        // Refresh the dropdown list with new options
+        dispatch(
+          getFormSelectOptions({
+            request: `Enum/${SelectsEnum["Programming_Language"]}`,
+          }),
+        );
+
+        return { value: newUUID, label: formattedValue }; // Return the new language object
+      }
+    } catch {
+      toast({
+        title: "This language is already added. Please add a new language.",
+        variant: "destructive",
+      });
+
+      return undefined; // Explicitly return undefined
+    }
+
+    return undefined; // Ensure the function always returns a value
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
@@ -88,11 +129,16 @@ export default function LanguageSelectionDialog({
               "master_enum_uuid",
             )}
             onDropdownOpenChange={setIsDropdownOpen}
+            onCustomOptionAdd={handleCustomOptionAdd}
           />
         </FormProvider>
         <CustomButton
-          className="mx-auto w-28"
-          onClick={() => onConfirm(methods.getValues("program_language"))}
+          className="mx-auto mt-20 w-28"
+          onClick={() => {
+            const selectedLanguages =
+              methods.getValues("program_language") || [];
+            onConfirm(selectedLanguages.length > 0 ? selectedLanguages : []);
+          }}
           disabled={methods.getValues("program_language").length === 0}
         >
           Confirm

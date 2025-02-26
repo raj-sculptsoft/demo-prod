@@ -11,6 +11,7 @@ export const uploadReportSlice = createSlice({
   name: "uploadReport",
   initialState,
   reducers: {
+    // Reset State
     resetUploadReportState: () => {
       return initialState;
     },
@@ -25,6 +26,7 @@ export const uploadReportSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Upload Report
     builder
       .addCase(uploadReport.pending, (state) => {
         state.uploadReport.loading = true;
@@ -40,6 +42,7 @@ export const uploadReportSlice = createSlice({
         state.uploadReport.error = error.message as string;
       });
 
+    // Fetch Report By Id
     builder
       .addCase(fetchReportById.pending, (state) => {
         state.reportStatus.loading = true;

@@ -11,7 +11,7 @@ export const getFormattedDate = (dateString?: string) => {
   if (!date.isValid()) return "Invalid Date";
 
   // Convert to the system's timezone
-  const formattedDateTime = date.tz(userTimeZone).format("YYYY-MM-DD HH:mm:ss");
+  const formattedDateTime = date.tz(userTimeZone).format("MM-DD-YYYY HH:mm:ss");
 
   return formattedDateTime;
 };

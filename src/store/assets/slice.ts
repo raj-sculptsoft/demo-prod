@@ -75,6 +75,7 @@ export const assetsSlice = createSlice({
   name: "assets",
   initialState,
   reducers: {
+    // Reset State
     resetCurrentAsset: (state) => {
       state.currentAsset = initialState.currentAsset;
     },

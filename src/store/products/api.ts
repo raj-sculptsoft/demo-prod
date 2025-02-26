@@ -19,6 +19,7 @@ const buildQueryParams = (params: GetProductParams) => {
   return queryParams.toString();
 };
 
+// Async thunk actions for API calls
 export const getProducts = createAsyncThunk(
   "products/getAll",
   async (params: GetProductParams, { rejectWithValue }) => {

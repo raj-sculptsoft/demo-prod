@@ -21,6 +21,7 @@ export default function Header({
         <Breadcrumb className="mb-5">
           <BreadcrumbList className="sm:gap-1">
             {nodes.map(({ name, href }, index) => {
+              // Check if there are multiple breadcrumb links and if this is NOT the last item
               const hasMoreThanOneLinks =
                 nodes.length > 1 && index + 1 !== nodes.length;
               return (
@@ -34,6 +35,7 @@ export default function Header({
                             ? "underline decoration-solid decoration-1 underline-offset-1"
                             : ""
                         } ${
+                          // Style the last breadcrumb differently (no underline, different text color)
                           nodes.length > 1 && index + 1 === nodes.length
                             ? "text-borderColor-dark hover:text-borderColor-dark"
                             : ""
@@ -43,6 +45,7 @@ export default function Header({
                       </Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
+                  {/* Add separator if this is not the last breadcrumb */}
                   {hasMoreThanOneLinks && (
                     <BreadcrumbSeparator className="[&>svg]:h-4 [&>svg]:w-5" />
                   )}

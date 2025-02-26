@@ -12,6 +12,7 @@ export default function Products() {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector(({ products }) => products.stats);
 
+  // Fetch product statistics when company_id is available
   useEffect(() => {
     if (company_id) {
       dispatch(getProductStats(company_id));
@@ -22,12 +23,12 @@ export default function Products() {
     <Layout>
       {loading ? (
         <div className="mb-4">
-          <CardSkeleton />
+          <CardSkeleton /> {/* Show loading skeleton while fetching stats */}
         </div>
       ) : (
-        <Stats />
+        <Stats /> // Display product stats once loading is complete
       )}
-      <ProductsList />
+      <ProductsList /> {/* Render the list of products */}
     </Layout>
   );
 }

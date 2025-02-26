@@ -8,7 +8,7 @@ export interface AssetData extends PaginatedListCommonResponse {
 export interface Asset {
   asset_id: string;
   asset_name: string;
-  program_language_all_data: string[]; // Fix here
+  program_language_all_data: string[] | null; // Fix here
   product_id: string;
   no_of_vulnerability: number;
   no_of_file: number;

@@ -12,7 +12,7 @@ export default function Stats() {
     {
       title: "Critical",
       icon: <Critical className="fill-red" />,
-      value: 0,
+      value: 0, // Default value, will be updated from API response
     },
     { title: "High", icon: <High className="fill-orange" />, value: 0 },
     {
@@ -28,7 +28,7 @@ export default function Stats() {
       setStatsData((prev) =>
         prev.map((item) => ({
           ...item,
-          value: data[item.title as keyof typeof data] ?? 0,
+          value: data[item.title as keyof typeof data] ?? 0, // Ensure correct type mapping and prevent undefined values
         })),
       );
     }

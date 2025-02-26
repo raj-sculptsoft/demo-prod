@@ -2,12 +2,14 @@ import clientFetcher from "@/lib/fetcher/client";
 import { Payload } from "@/lib/fetcher/types";
 import { AssetData } from "@/types/assets";
 import {
+  AddUpdateEnum,
   PaginatedListCommonResponse,
   StaticSelectOptions,
 } from "@/types/common";
 import { ProductData } from "@/types/products";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// Async thunk actions for API calls
 export const getAllProducts = createAsyncThunk(
   "all-products",
   async (payload: Payload) => {
@@ -47,6 +49,22 @@ export const getFormSelectOptions = createAsyncThunk(
     return clientFetcher<{ list: StaticSelectOptions[] }>({
       request,
     });
+  },
+);
+
+export const addFormSelectOptions = createAsyncThunk(
+  "add-form-select-options",
+  async (payload: {
+    master_enum_uuid: null;
+    master_enum_type_id: number;
+    master_enum_name: string;
+  }) => {
+    const response = await clientFetcher<AddUpdateEnum>({
+      request: "Enum/AddUpdateEnum",
+      method: "POST",
+      payload,
+    });
+    return response;
   },
 );
 

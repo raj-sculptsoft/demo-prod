@@ -1,3 +1,10 @@
+import { Link, useLocation } from "react-router-dom";
+import DashboardIcon from "../../assets/icons/dashboard";
+import Logo from "../../assets/icons/logo";
+import ProductIcon from "../../assets/icons/product";
+import UploadReport from "../../assets/icons/upload-report";
+import VulnerabilitiesIcon from "../../assets/icons/vulnerabilities";
+
 import Settings from "@/assets/icons/settings";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { resetStatusId, resetStatusReportState } from "@/store/settings/slice";
@@ -5,14 +12,7 @@ import {
   resetReportId,
   resetReportStatusState,
 } from "@/store/upload-reports/slice";
-import { match } from "path-to-regexp";
 import { useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import DashboardIcon from "../../assets/icons/dashboard";
-import Logo from "../../assets/icons/logo";
-import ProductIcon from "../../assets/icons/product";
-import UploadReport from "../../assets/icons/upload-report";
-import VulnerabilitiesIcon from "../../assets/icons/vulnerabilities";
 import {
   Sidebar,
   SidebarContent,
@@ -67,14 +67,14 @@ export default function SideBar() {
   const { reportId } = useAppSelector((state) => state.uploadReport);
   const statusId = useAppSelector((state) => state.synk.statusId);
 
+  // Helper function to check if a route pattern matches the current path
   const isRouteMatch = (pattern: string, path: string) => {
-    try {
-      const matcher = match(pattern, { decode: decodeURIComponent });
-      return !!matcher(path);
-    } catch (error) {
-      console.error("Invalid route pattern:", pattern, error);
-      return false;
-    }
+    // Convert route pattern to regex
+    const regexPattern = pattern
+      .replace(/:[^/]+/g, "[^/]+") // Replace :param with regex pattern
+      .replace(/\//g, "\\/"); // Escape forward slashes
+    const regex = new RegExp(`^${regexPattern}$`);
+    return regex.test(path);
   };
 
   useEffect(() => {
@@ -83,11 +83,14 @@ export default function SideBar() {
         // Skip the first render
         isFirstRender.current = false;
       } else {
+        // Reset report and status-related state when navigating between pages
         dispatch(resetReportId());
         dispatch(resetReportStatusState());
 
         dispatch(resetStatusReportState());
         dispatch(resetStatusId());
+
+        // Mark as first render again to prevent redundant resets
         isFirstRender.current = true;
       }
     } else {

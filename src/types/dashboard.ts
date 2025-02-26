@@ -1,17 +1,3 @@
-// export interface DashboardStats {
-//   total_products: number;
-//   total_vulnerabilities: number;
-//   total_false_positives: number;
-//   total_true_positives: number;
-//   total_hours_saved: number;
-//   total_files: number;
-//   total_assets: number;
-//   critical_count: number;
-//   high_count: number;
-//   medium_count: number;
-//   low_count: number;
-// }
-
 export interface DashboardStats {
   total_products: number;
   total_vulnerabilities: number;

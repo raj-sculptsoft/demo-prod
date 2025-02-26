@@ -7,12 +7,11 @@ import DataTable from "@/components/core/data-table/table";
 import { DeleteDialog } from "@/components/core/delete-dialog";
 import CustomTooltip from "@/components/core/tooltip";
 import { TableCell, TableHead, TableRow } from "@/components/ui/table";
-import config from "@/config/env";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-store";
 import { toast } from "@/hooks/use-toast";
 import { getFormattedDate } from "@/lib/date";
 import { IError } from "@/lib/fetcher/types";
-import { deleteAsset } from "@/store/assets/api";
+import { deleteAsset, getAssetStats } from "@/store/assets/api";
 import { setEditDetails, setShowAssetForm } from "@/store/assets/slice";
 import { getListForTable } from "@/store/common/api";
 import {
@@ -20,11 +19,11 @@ import {
   resetTableData,
   setDeleteDialogOptions,
   setPage,
+  setRowsPerPage,
   setSorting,
 } from "@/store/common/slice";
-import { getProductStats } from "@/store/products/api";
 import { Asset } from "@/types/assets";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // Updated imports
 
 const columns = [
@@ -38,6 +37,8 @@ export default function AssetsList() {
   const dispatch = useAppDispatch();
   const searchParams = new URLSearchParams(window.location.search); // Replacing useSearchParams
   const search = searchParams.get("assetSearch");
+  const pageFromUrl = Number(searchParams.get("page")) || 1;
+  const rowsPerPageFromUrl = Number(searchParams.get("rowsPerPage")) || 5;
   const { productId } = useParams<{ productId: string | undefined }>();
   const navigate = useNavigate();
 
@@ -53,9 +54,25 @@ export default function AssetsList() {
     ({ common }) => common.deleteDialog,
   );
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
-    dispatch(setPage(1));
+    if (isFirstRender.current) {
+      isFirstRender.current = false; // Skip first render to prevent unnecessary state updates
+      return;
+    }
+
+    dispatch(setPage(1)); // Reset page in Redux store
+
+    const params = new URLSearchParams(location.search);
+    params.set("page", "1"); // Update page in URL
+    navigate({ search: params.toString() }, { replace: true });
   }, [search, dispatch]);
+
+  useEffect(() => {
+    dispatch(setPage(pageFromUrl));
+    dispatch(setRowsPerPage(rowsPerPageFromUrl));
+  }, [pageFromUrl, rowsPerPageFromUrl, dispatch]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -79,7 +96,7 @@ export default function AssetsList() {
 
   useEffect(() => {
     return () => {
-      dispatch(resetTableData());
+      dispatch(resetTableData()); // Cleanup: Reset table data when component unmounts
     };
   }, [dispatch]);
 
@@ -91,11 +108,12 @@ export default function AssetsList() {
 
       toast({ title: message });
 
+      // Adjust the page number if the last item on the current page is deleted
       const newPage =
         (list as Asset[]).length <= 1 && page > 1 ? page - 1 : page;
 
       if ((list as Asset[]).length <= 1) {
-        dispatch(clearAsset());
+        dispatch(clearAsset()); // Clear asset details if no assets remain
       }
 
       dispatch(setPage(newPage));
@@ -114,7 +132,9 @@ export default function AssetsList() {
         }),
       );
 
-      dispatch(getProductStats(config.COMPANY_ID));
+      if (productId) {
+        dispatch(getAssetStats(productId)); // Refresh asset stats after deletion
+      }
     } catch (error) {
       toast({
         title: (error as IError)?.message ?? "Something went wrong",
@@ -230,6 +250,7 @@ export default function AssetsList() {
                 className="cursor-pointer"
                 onClick={() => onViewVulnerabilities(item, productId)}
               >
+                {/* Truncate long asset names */}
                 {item.asset_name?.length > 30
                   ? `${item.asset_name.slice(0, 30)}...`
                   : item.asset_name}

@@ -14,66 +14,6 @@ type VulnerabilitiesStatsProps = {
 export default function VulnerabilitiesStats({
   data,
 }: VulnerabilitiesStatsProps) {
-  // const isDashboardStats = (
-  //   data: VulnerabilityCounts | DashboardStats,
-  // ): data is DashboardStats => "critical_count" in data;
-
-  // const statsData = isDashboardStats(data)
-  //   ? [
-  //       {
-  //         title: "Total",
-  //         icon: <Total className="fill-primary" />,
-  //         value: data.total_vulnerabilities ?? 0,
-  //       },
-  //       {
-  //         title: "Critical",
-  //         icon: <Critical className="fill-red" />,
-  //         value: data.critical_count ?? 0,
-  //       },
-  //       {
-  //         title: "High",
-  //         icon: <High className="fill-orange" />,
-  //         value: data.high_count ?? 0,
-  //       },
-  //       {
-  //         title: "Medium",
-  //         icon: <Medium className="fill-yellow" />,
-  //         value: data.medium_count ?? 0,
-  //       },
-  //       {
-  //         title: "Low",
-  //         icon: <Low className="fill-green-light" />,
-  //         value: data.low_count ?? 0,
-  //       },
-  //     ]
-  //   : [
-  //       {
-  //         title: "Total",
-  //         icon: <Total className="fill-primary" />,
-  //         value: data.total_count,
-  //       },
-  //       {
-  //         title: "Critical",
-  //         icon: <Critical className="fill-red" />,
-  //         value: data.Critical,
-  //       },
-  //       {
-  //         title: "High",
-  //         icon: <High className="fill-orange" />,
-  //         value: data.High,
-  //       },
-  //       {
-  //         title: "Medium",
-  //         icon: <Medium className="fill-yellow" />,
-  //         value: data.Medium,
-  //       },
-  //       {
-  //         title: "Low",
-  //         icon: <Low className="fill-green-light" />,
-  //         value: data.Low,
-  //       },
-  //     ];
-
   const isDashboardStats = (
     data: VulnerabilityCounts | DashboardStats,
   ): data is DashboardStats => "total_vulnerabilities" in data;
@@ -81,6 +21,10 @@ export default function VulnerabilitiesStats({
   const searchParams = new URLSearchParams(location.search);
   const positivity_filter = searchParams.get("type") === "True"; // Correctly interpret the positivity filter as a boolean
 
+  // Construct statsData based on whether the data comes from DashboardStats or VulnerabilityCounts.
+  // - If `positivity_filter` is true, show true positive counts.
+  // - Otherwise, show false positive counts.
+  // - Different field names are used depending on the type of `data`, so we check its type first.
   const statsData = isDashboardStats(data)
     ? positivity_filter
       ? [

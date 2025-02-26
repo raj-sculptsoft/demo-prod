@@ -6,7 +6,7 @@ import {
   setEditDetails,
   setShowProductForm,
 } from "@/store/products/slice";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Delete from "../../../assets/icons/delete";
 import Edit from "../../../assets/icons/edit";
@@ -25,6 +25,7 @@ import {
   resetTableData,
   setDeleteDialogOptions,
   setPage,
+  setRowsPerPage,
   setSorting,
 } from "../../../store/common/slice";
 import { Product } from "../../../types/products";
@@ -40,6 +41,8 @@ export default function ProductsList() {
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
   const productSearch = searchParams.get("productSearch");
+  const pageFromUrl = Number(searchParams.get("page")) || 1;
+  const rowsPerPageFromUrl = Number(searchParams.get("rowsPerPage")) || 5;
 
   const {
     sorting,
@@ -53,12 +56,28 @@ export default function ProductsList() {
     ({ common }) => common.deleteDialog,
   );
 
+  const isFirstRender = useRef(true);
+
   useEffect(() => {
-    dispatch(setPage(1));
+    if (isFirstRender.current) {
+      isFirstRender.current = false; // Skip first render
+      return;
+    }
+
+    dispatch(setPage(1)); // Reset page in Redux store
+
+    const params = new URLSearchParams(location.search);
+    params.set("page", "1"); // Update page in URL
+    navigate({ search: params.toString() }, { replace: true });
   }, [productSearch, dispatch]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    dispatch(setPage(pageFromUrl)); // Sync page state from URL
+    dispatch(setRowsPerPage(rowsPerPageFromUrl)); // Sync rows per page state from URL
+  }, [pageFromUrl, rowsPerPageFromUrl, dispatch]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0); // Ensure the page always starts at the top when the product list updates
   }, [list]);
 
   useEffect(() => {
@@ -76,15 +95,15 @@ export default function ProductsList() {
           },
         }),
       );
-    }, 50);
+    }, 50); // Debounce API call slightly to avoid excessive requests
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timeout); // Cleanup function to prevent unnecessary API calls on re-renders
   }, [column, direction, dispatch, page, rowsPerPage, productSearch]);
 
   useEffect(() => {
     return () => {
-      dispatch(resetTableData());
-      dispatch(resetList());
+      dispatch(resetTableData()); // Clear table data on unmount to avoid stale state
+      dispatch(resetList()); // Reset the product list state
     };
   }, [dispatch]);
 
@@ -96,11 +115,13 @@ export default function ProductsList() {
 
       toast({ title: message });
 
+      // If the last item on the current page is deleted, move to the previous page
       const newPage =
         (list as Product[]).length <= 1 && page > 1 ? page - 1 : page;
 
       dispatch(setPage(newPage));
 
+      // Fetch updated product list after deletion
       dispatch(
         getListForTable({
           request: "Product/List",
@@ -115,7 +136,7 @@ export default function ProductsList() {
         }),
       );
 
-      dispatch(getProductStats(config.COMPANY_ID));
+      dispatch(getProductStats(config.COMPANY_ID)); // Update product statistics after deletion
     } catch (error) {
       toast({
         title: (error as IError)?.message ?? "Something went wrong",
@@ -232,6 +253,7 @@ export default function ProductsList() {
                   className="cursor-pointer"
                   onClick={() => onViewAssets(item)}
                 >
+                  {/* Truncate long product names */}
                   {item.product_name?.length > 30
                     ? `${item.product_name.slice(0, 30)}...`
                     : item.product_name}

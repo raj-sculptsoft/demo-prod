@@ -21,6 +21,7 @@ export default function TopVulnerableAssets({
 
   let title = "";
 
+  // Determine the title based on the available data fields
   if (graphData.list[0]?.product_name) {
     title = "Top Vulnerable Products";
   } else if (graphData.list[0]?.asset_name) {

@@ -28,6 +28,7 @@ const buildQueryParams = (params: GetDashboardParams) => {
   return queryParams.toString();
 };
 
+// Async thunk actions for API calls
 export const getDashboardStats = createAsyncThunk(
   "dashboard/stats",
   async (params: GetDashboardParams, { rejectWithValue }) => {

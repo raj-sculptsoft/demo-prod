@@ -14,6 +14,7 @@ export default function Vulnerabilities() {
     { type: "Critical", value: data.critical_count, className: "fill-red" },
   ];
 
+  // Add "Total" to the chart only if there are vulnerabilities
   if (data.total_vulnerabilities !== 0) {
     chartData.push({
       type: "Total",

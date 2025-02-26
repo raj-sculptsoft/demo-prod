@@ -103,6 +103,7 @@ export const dashboardSlice = createSlice({
   name: "dashboard",
   initialState,
   reducers: {
+    // Reset State
     resetDashboardState: () => {
       return initialState;
     },

@@ -14,7 +14,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
+  // Check if "type" query param is "True"
   const isTypeTrue = queryParams.get("type") === "True";
+
+  // Determine if any filters are applied
   const hasFiltersApplied =
     queryParams.has("product") || queryParams.has("asset") || isTypeTrue;
 
@@ -31,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [showProcessingMessage, setShowProcessingMessage] = useState(false);
 
   useEffect(() => {
-    // Show processing message if report is in progress and reportId exists
+    // Show processing message if either report or status is in progress
     if (
       (reportData.status === "In Progress" && reportId) ||
       (statusReportData.status === "In Progress" && statusId)
