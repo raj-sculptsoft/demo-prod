@@ -20,19 +20,17 @@ jobs:
         run: |
           npm install
       
-      # Step 3: Set API URL Based on Branch
-      - name: Set API URL Based on Branch
+      # Step 3: Set API URL Based on GitHub Variable
+      - name: Set API URL
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
-          fi
-
-      # Step 4: Print API URL (Now it will be set correctly)
+          echo "VITE_PUBLIC_API_URL=${{ vars.VITE_PUBLIC_API_URL_DEV }}" >> $GITHUB_ENV
+      
+      # Step 4: Print API URL (Should now correctly show the value)
       - name: Print API URL
         run: |
           echo "VITE_PUBLIC_API_URL is set to: $VITE_PUBLIC_API_URL"
 
-      # Step 5: Build the React App
+      # Step 5: Build the React App with Correct API URL
       - name: Build React App
         run: |
           npm run build
